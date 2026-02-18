@@ -60,27 +60,31 @@ static void freeLineNode(LineNode** node)
     *node = NULL;
 }
 
-static char* copyField(const char* s, int* size)
+/*
+ s - the line containing fields,
+ size - where size of the field will be stored,
+ i - starting index of the field.
+ */
+static char* copyField(const char* s, int* size, int* i)
 {
     if (s == NULL || size == NULL || s[0] == '\0')
         return NULL;
     char buf[BUFSIZ] = {};
-    bool has_quote = s[0] == '"';
+    bool has_quote = s[*i] == '"';
     if (!has_quote) {
-        buf[0] = s[0];
+        buf[0] = s[*i];
         *size = 1;
     } else {
         *size = 0;
     }
 
-    for (int i = 1; i < BUFSIZ; i++) {
-        char c = s[i];
+    (*i)++;
+    for (; *i < BUFSIZ; (*i)++) {
+        char c = s[*i];
         if (c == '\0' || (!has_quote && c == ','))
             break;
         if (has_quote && c == '\"') {
-            if (s[i + 1] == '\"') {
-                i++;
-            } else {
+            if (s[++(*i) + 1] != '\"') {
                 break;
             }
         }
@@ -167,10 +171,9 @@ static LineNode* parseLine(char* line, int fieldsCount)
 
     /* Count widths of the fields and copy them. */
     int fieldIdx = 0;
-    int i = 0;
-    while (line[i] != '\0') {
+    for (int i = 0; line[i] != '\0'; i++) {
         int curSize = 0;
-        node->fields[fieldIdx] = copyField(line + i, &curSize);
+        node->fields[fieldIdx] = copyField(line, &curSize, &i);
         printf("DEBUG: (%.*s)\n",curSize, node->fields[fieldIdx]);
         if (node->fields[fieldIdx] == NULL) {
             freeLineNode(&node);
@@ -178,7 +181,6 @@ static LineNode* parseLine(char* line, int fieldsCount)
         }
         node->fieldWidths[fieldIdx] = curSize;
         fieldIdx++;
-        i += curSize + 1;
     }
 
     return node;
