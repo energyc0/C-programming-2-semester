@@ -38,6 +38,20 @@ static void setMaxArray(int* src, const int* dst, int size)
         src[i] = imax(src[i], dst[i]);
 }
 
+/* Reads line and deletes newline character */
+static char* myReadLine(char* s, int n, FILE* stream)
+{
+    char* p = fgets(s, n, stream);
+    if(p == NULL)
+        return NULL;
+    int size = strlen(p);
+    if (size > 0 && p[size - 1] == '\n')
+        p[size-1] = '\0';
+
+    //printf("Line read: (%s)\n", p);
+    return p;
+}
+
 static void freeLineNode(LineNode** node)
 {
     free((*node)->fields);
@@ -48,26 +62,31 @@ static void freeLineNode(LineNode** node)
 
 static char* copyField(const char* s, int* size)
 {
-    if (s == NULL || size == NULL)
+    if (s == NULL || size == NULL || s[0] == '\0')
         return NULL;
     char buf[BUFSIZ] = {};
     bool has_quote = s[0] == '"';
-    buf[0] = s[0];
-    *size = 1;
-    while (*size < BUFSIZ) {
-        char c = s[*size];
+    if (!has_quote) {
+        buf[0] = s[0];
+        *size = 1;
+    } else {
+        *size = 0;
+    }
+
+    for (int i = 1; i < BUFSIZ; i++) {
+        char c = s[i];
         if (c == '\0' || (!has_quote && c == ','))
             break;
         if (has_quote && c == '\"') {
-            if (s[*size + 1] == '\"') {
-                (*size)++;
+            if (s[i + 1] == '\"') {
+                i++;
             } else {
                 break;
             }
         }
         buf[(*size)++] = c;
     }
-    buf[*size] = '\0';
+    buf[(*size)] = '\0';
     return strdup(buf);
 }
 
@@ -127,6 +146,7 @@ static LineNode* parseLine(char* line, int fieldsCount)
 {
     if (line == NULL)
         return NULL;
+
     /* Allocate all the data needed for the node. */
     LineNode* node = malloc(sizeof(*node));
     if (node == NULL)
@@ -151,6 +171,7 @@ static LineNode* parseLine(char* line, int fieldsCount)
     while (line[i] != '\0') {
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line + i, &curSize);
+        printf("DEBUG: (%.*s)\n",curSize, node->fields[fieldIdx]);
         if (node->fields[fieldIdx] == NULL) {
             freeLineNode(&node);
             return NULL;
@@ -177,7 +198,7 @@ CSVData* CSVDataRead(FILE* fp)
         return data;
 
     char buf[BUFSIZ] = {};
-    char* line = fgets(buf, sizeof(buf), fp);
+    char* line = myReadLine(buf, sizeof(buf), fp);
     if (line == NULL || !parseInitLine(data, line)) {
         free(data);
         return NULL;
@@ -196,7 +217,7 @@ CSVData* CSVDataRead(FILE* fp)
     LineNode* lastNode = data->head;
     printf("%lu\n", sizeof(CSVData));
     while (!feof(fp)) {
-        line = fgets(buf, sizeof(buf), fp);
+        line = myReadLine(buf, sizeof(buf), fp);
         printf("%lu\n", sizeof(CSVData));
         /* Checks if line == NULL and allocates new node. */
         lastNode->next = parseLine(line, data->fieldsCount);
