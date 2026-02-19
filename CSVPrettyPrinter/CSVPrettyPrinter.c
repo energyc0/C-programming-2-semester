@@ -1,5 +1,6 @@
 #include "CSVPrettyPrinter.h"
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +79,8 @@ static char* copyField(const char* s, int* size, int* i)
     if (s == NULL || size == NULL || s[0] == '\0')
         return NULL;
     char buf[BUFSIZ] = {};
+    while (isspace(s[*i]))
+        (*i)++;
     bool has_quote = s[*i] == '"';
     if (!has_quote) {
         buf[0] = s[*i];
@@ -189,12 +192,13 @@ static bool parseLine(const char* line, CSVData* data)
     for (int i = 0; line[i] != '\0'; i++) {
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line, &curSize, &i);
-        printf("DEBUG: (%.*s)\n", curSize, node->fields[fieldIdx]);
+        // printf("DEBUG: (%.*s)\n", curSize, node->fields[fieldIdx]);
         if (node->fields[fieldIdx] == NULL) {
             freeLineNode(&node);
             return false;
         }
         node->fieldWidths[fieldIdx] = curSize;
+        data->fieldMaxWidths[fieldIdx] = imax(curSize, data->fieldMaxWidths[fieldIdx]);
         fieldIdx++;
     }
 
@@ -223,9 +227,11 @@ CSVData* CSVDataRead(FILE* fp)
         return data;
 
     char buf[BUFSIZ] = {};
+
     while (!feof(fp)) {
         char* line = myReadLine(buf, sizeof(buf), fp);
-        /* Checks if line == NULL and allocates new node. */
+        if (line == NULL || line[0] == '\0')
+            break;
         if (!parseLine(line, data)) {
             CSVDataFree(&data);
             return NULL;
@@ -234,13 +240,50 @@ CSVData* CSVDataRead(FILE* fp)
     return data;
 }
 
+/* Draws line for table in buffer and returns it. */
+static char* drawRow(char* buf, const int* fieldWidths, int fieldsCount, char rowChar)
+{
+    int i = 0;
+    for (int f = 0; f < fieldsCount; f++) {
+        buf[i++] = '+';
+        memset(buf + i, rowChar, fieldWidths[f]);
+        i += fieldWidths[f];
+    }
+    buf[i++] = '+';
+    buf[i] = '\0';
+    return buf;
+}
+
+/* Draws fields of line in buffer and returns it. */
+static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const int* fieldMaxWidths)
+{
+    int i = 0;
+    for (int f = 0; f < fieldsCount; f++) {
+        buf[i++] = '|';
+        sprintf(buf + i, "%s", node->fields[f]);
+        i += node->fieldWidths[f];
+        int blankSpace = fieldMaxWidths[f] - node->fieldWidths[f];
+        memset(buf + i, ' ', blankSpace);
+        i += blankSpace;
+    }
+    buf[i++] = '|';
+    buf[i] = '\0';
+    return buf;
+}
+
 int CSVDataWrite(const CSVData* data, FILE* fp)
 {
-    for (LineNode* p = data->head; p != NULL; p = p->next) {
-        for (int i = 0; i < data->fieldsCount; i++) {
-            fprintf(fp, "%s;", p->fields[i]);
-        }
-        fputc('\n', fp);
+    if (data == NULL || data->head == NULL)
+        return 1;
+
+    char buf[BUFSIZ] = {};
+    fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '='));
+    fprintf(fp, "%s\n", drawFields(buf, data->head, data->fieldsCount, data->fieldMaxWidths));
+    fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '='));
+
+    for (LineNode* p = data->head->next; p != NULL; p = p->next) {
+        fprintf(fp, "%s\n", drawFields(buf, p, data->fieldsCount, data->fieldMaxWidths));
+        fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '-'));
     }
     return 1;
 }
