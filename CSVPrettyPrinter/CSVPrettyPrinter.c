@@ -52,6 +52,10 @@ static char* myReadLine(char* s, int n, FILE* stream)
     return p;
 }
 
+/*
+ Free *node pointer and sets *node=NULL.
+ Checks if *node fields are not NULL.
+ */
 static void freeLineNode(LineNode** node)
 {
     if ((*node) == NULL)
@@ -165,6 +169,7 @@ static bool parseLine(const char* line, CSVData* data)
     LineNode* node = malloc(sizeof(*node));
     if (node == NULL)
         return false;
+    memset(node, 0, sizeof(*node));
 
     node->fieldWidths = malloc(sizeof(node->fieldWidths[0]) * data->fieldsCount);
     if (node->fieldWidths == NULL) {
@@ -240,6 +245,10 @@ int CSVDataWrite(const CSVData* data, FILE* fp)
     return 1;
 }
 
+/*
+ Free *data pointer and sets *data=NULL.
+ Checks if *data fields are not NULL.
+ */
 void CSVDataFree(CSVData** data)
 {
     if (*data == NULL)
