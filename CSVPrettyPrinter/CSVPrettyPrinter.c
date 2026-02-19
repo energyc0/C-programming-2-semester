@@ -19,6 +19,7 @@ typedef struct LineNode {
  */
 struct CSVData {
     LineNode* head;
+    LineNode* lastNode;
     int fieldsCount;
     int* fieldMaxWidths;
 };
@@ -48,14 +49,17 @@ static char* myReadLine(char* s, int n, FILE* stream)
     if (size > 0 && p[size - 1] == '\n')
         p[size - 1] = '\0';
 
-    // printf("Line read: (%s)\n", p);
     return p;
 }
 
 static void freeLineNode(LineNode** node)
 {
-    free((*node)->fields);
-    free((*node)->fieldWidths);
+    if ((*node) == NULL)
+        return;
+    if ((*node)->fields != NULL)
+        free((*node)->fields);
+    if ((*node)->fieldWidths != NULL)
+        free((*node)->fieldWidths);
     free(*node);
     *node = NULL;
 }
@@ -133,7 +137,8 @@ static bool parseInitLine(CSVData* data, const char* line)
 {
     /* Count fields */
     data->fieldsCount = countFields(line);
-    printf("%d\n", data->fieldsCount);
+    if (data->fieldsCount <= 0)
+        return false;
     const unsigned size = sizeof(data->fieldMaxWidths[0]) * data->fieldsCount;
     data->fieldMaxWidths = malloc(size);
     if (data->fieldMaxWidths == NULL)
@@ -146,26 +151,31 @@ static bool parseInitLine(CSVData* data, const char* line)
  Allocate LineNode struct,
  return NULL on fail, checks line == NULL.
  */
-static LineNode* parseLine(char* line, int fieldsCount)
+static bool parseLine(const char* line, CSVData* data)
 {
     if (line == NULL)
-        return NULL;
+        return false;
 
+    if (data->head == NULL) {
+        if (!parseInitLine(data, line)) {
+            return false;
+        }
+    }
     /* Allocate all the data needed for the node. */
     LineNode* node = malloc(sizeof(*node));
     if (node == NULL)
-        return NULL;
+        return false;
 
-    node->fieldWidths = malloc(sizeof(node->fieldWidths[0]) * fieldsCount);
+    node->fieldWidths = malloc(sizeof(node->fieldWidths[0]) * data->fieldsCount);
     if (node->fieldWidths == NULL) {
         free(node);
-        return NULL;
+        return false;
     }
-    node->fields = malloc(sizeof(char*) * fieldsCount);
+    node->fields = malloc(sizeof(char*) * data->fieldsCount);
     if (node->fields == NULL) {
         free(node->fieldWidths);
         free(node);
-        return NULL;
+        return false;
     }
     node->next = NULL;
 
@@ -177,13 +187,20 @@ static LineNode* parseLine(char* line, int fieldsCount)
         printf("DEBUG: (%.*s)\n", curSize, node->fields[fieldIdx]);
         if (node->fields[fieldIdx] == NULL) {
             freeLineNode(&node);
-            return NULL;
+            return false;
         }
         node->fieldWidths[fieldIdx] = curSize;
         fieldIdx++;
     }
 
-    return node;
+    if (data->head == NULL) {
+        data->head = node;
+        data->lastNode = node;
+    } else {
+        data->lastNode->next = node;
+        data->lastNode = node;
+    }
+    return true;
 }
 
 CSVData* CSVDataRead(FILE* fp)
@@ -195,39 +212,19 @@ CSVData* CSVDataRead(FILE* fp)
     data->head = NULL;
     data->fieldsCount = 0;
     data->fieldMaxWidths = NULL;
+    data->lastNode = NULL;
 
     if (feof(fp))
         return data;
 
     char buf[BUFSIZ] = {};
-    char* line = myReadLine(buf, sizeof(buf), fp);
-    if (line == NULL || !parseInitLine(data, line)) {
-        free(data);
-        return NULL;
-    }
-
-    printf("%lu\n", sizeof(CSVData));
-    data->head = parseLine(line, data->fieldsCount);
-    printf("%lu\n", sizeof(CSVData));
-    if (data->head == NULL) {
-        free(data->fieldMaxWidths);
-        free(data);
-        return NULL;
-    }
-
-    /* Node to insert. */
-    LineNode* lastNode = data->head;
-    printf("%lu\n", sizeof(CSVData));
     while (!feof(fp)) {
-        line = myReadLine(buf, sizeof(buf), fp);
-        printf("%lu\n", sizeof(CSVData));
+        char* line = myReadLine(buf, sizeof(buf), fp);
         /* Checks if line == NULL and allocates new node. */
-        lastNode->next = parseLine(line, data->fieldsCount);
-        if (lastNode->next == NULL) {
+        if (!parseLine(line, data)) {
             CSVDataFree(&data);
             return NULL;
         }
-        lastNode = lastNode->next;
     }
     return data;
 }
@@ -245,12 +242,15 @@ int CSVDataWrite(const CSVData* data, FILE* fp)
 
 void CSVDataFree(CSVData** data)
 {
-    free((*data)->fieldMaxWidths);
+    if (*data == NULL)
+        return;
+    if ((*data)->fieldMaxWidths != NULL)
+        free((*data)->fieldMaxWidths);
     LineNode* p = (*data)->head;
     while (p != NULL) {
         LineNode* prev = p;
         p = p->next;
-        free(prev);
+        freeLineNode(&prev);
     }
     free(*data);
     *data = NULL;
