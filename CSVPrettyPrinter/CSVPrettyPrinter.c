@@ -42,13 +42,13 @@ static void setMaxArray(int* src, const int* dst, int size)
 static char* myReadLine(char* s, int n, FILE* stream)
 {
     char* p = fgets(s, n, stream);
-    if(p == NULL)
+    if (p == NULL)
         return NULL;
     int size = strlen(p);
     if (size > 0 && p[size - 1] == '\n')
-        p[size-1] = '\0';
+        p[size - 1] = '\0';
 
-    //printf("Line read: (%s)\n", p);
+    // printf("Line read: (%s)\n", p);
     return p;
 }
 
@@ -84,7 +84,7 @@ static char* copyField(const char* s, int* size, int* i)
         if (c == '\0' || (!has_quote && c == ','))
             break;
         if (has_quote && c == '\"') {
-            if (s[++(*i) + 1] != '\"') {
+            if (s[++(*i)] != '\"') {
                 break;
             }
         }
@@ -174,7 +174,7 @@ static LineNode* parseLine(char* line, int fieldsCount)
     for (int i = 0; line[i] != '\0'; i++) {
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line, &curSize, &i);
-        printf("DEBUG: (%.*s)\n",curSize, node->fields[fieldIdx]);
+        printf("DEBUG: (%.*s)\n", curSize, node->fields[fieldIdx]);
         if (node->fields[fieldIdx] == NULL) {
             freeLineNode(&node);
             return NULL;
