@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.29)
 
 project(CSVPrettyPrinter C)
 
-set(SOURCE_DIR "CSVPrettyPrinter")
+set(SOURCE_DIR "sources/CSVPrettyPrinter")
 add_compile_options(-g)
 
 add_library(CSVPrettyPrinterLib STATIC ${SOURCE_DIR}/CSVPrettyPrinter.c)
