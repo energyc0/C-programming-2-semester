@@ -1,0 +1,12 @@
+name: clang-format-tidy-check
+on: [push|pull_request]
+jobs:
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      -uses: actions/checkout@v5
+      -run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      -run: run-clang-tidy -p=build -checks=-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+      -run: clang-format --dry-run ./*/*.{c,h} --style=Webkit --Werror
+
+  
