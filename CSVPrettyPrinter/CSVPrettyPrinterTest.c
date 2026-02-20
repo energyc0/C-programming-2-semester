@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     if (!CSVDataWrite(data, fpout)) {
         fclose(fpout);
         CSVDataFree(&data);
-        fprintf(stderr, "Failed to write to \"%s\".\n", argv[2]);
+        fprintf(stderr, "Failed to write to \"%s\": %s\n", argv[2], strerror(errno));
         return 1;
     }
     fclose(fpout);

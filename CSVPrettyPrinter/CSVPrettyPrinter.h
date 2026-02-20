@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct CSVData CSVData;
 
@@ -12,10 +13,10 @@ typedef struct CSVData CSVData;
 CSVData* CSVDataRead(FILE* fp);
 /*
  Print CSV data to file descriptor.
- Return 1 on success, 0 otherwise.
+ Return true on success, false otherwise.
  Write error details to errno.
  */
-int CSVDataWrite(const CSVData* data, FILE* fp);
+bool CSVDataWrite(const CSVData* data, FILE* fp);
 
 /*
  Free CSV data and set pointer to NULL.

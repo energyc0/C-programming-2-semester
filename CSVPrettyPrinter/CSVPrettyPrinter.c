@@ -295,21 +295,27 @@ static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const 
     return buf;
 }
 
-int CSVDataWrite(const CSVData* data, FILE* fp)
+bool CSVDataWrite(const CSVData* data, FILE* fp)
 {
+    /* Empty table */
     if (data == NULL || data->head == NULL)
-        return 1;
+        return true;
 
     char buf[BUFSIZ] = {};
-    fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '='));
-    fprintf(fp, "%s\n", drawFields(buf, data->head, data->fieldsCount, data->fieldMaxWidths));
-    fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '='));
+    if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '=')) < 0)
+        return false;
+    if (fprintf(fp, "%s\n", drawFields(buf, data->head, data->fieldsCount, data->fieldMaxWidths)) < 0)
+        return false;
+    if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '=')) < 0)
+        return false;
 
     for (LineNode* p = data->head->next; p != NULL; p = p->next) {
-        fprintf(fp, "%s\n", drawFields(buf, p, data->fieldsCount, data->fieldMaxWidths));
-        fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '-'));
+        if (fprintf(fp, "%s\n", drawFields(buf, p, data->fieldsCount, data->fieldMaxWidths)) < 0)
+            return false;
+        if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '-')) < 0)
+            return false;
     }
-    return 1;
+    return true;
 }
 
 /*
