@@ -73,14 +73,25 @@ static void freeLineNode(LineNode** node)
  s - the line containing fields,
  size - where size of the field will be stored,
  i - starting index of the field.
+ Returns valid string or NULL if field is empty or error occurred.
+ *size is always >= 0, *size = -1 if error occured.
  */
 static char* copyField(const char* s, int* size, int* i)
 {
-    if (s == NULL || size == NULL || s[0] == '\0')
+    if (s == NULL || size == NULL) {
+        *size = -1;
         return NULL;
-    char buf[BUFSIZ] = {};
+    }
+
     while (isspace(s[*i]))
         (*i)++;
+
+    if (s[*i] == '\0' || s[*i] == ',') {
+        *size = 0;
+        return NULL;
+    }
+
+    char buf[BUFSIZ] = {};
     bool has_quote = s[*i] == '"';
     if (!has_quote) {
         buf[0] = s[*i];
@@ -192,8 +203,8 @@ static bool parseLine(const char* line, CSVData* data)
     for (int i = 0; line[i] != '\0'; i++) {
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line, &curSize, &i);
-        // printf("DEBUG: (%.*s)\n", curSize, node->fields[fieldIdx]);
-        if (node->fields[fieldIdx] == NULL) {
+        printf("DEBUG: (%s)\n", node->fields[fieldIdx]);
+        if (curSize == -1) {
             freeLineNode(&node);
             return false;
         }
@@ -260,7 +271,8 @@ static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const 
     int i = 0;
     for (int f = 0; f < fieldsCount; f++) {
         buf[i++] = '|';
-        sprintf(buf + i, "%s", node->fields[f]);
+        if (node->fields[f] != NULL)
+            sprintf(buf + i, "%s", node->fields[f]);
         i += node->fieldWidths[f];
         int blankSpace = fieldMaxWidths[f] - node->fieldWidths[f];
         memset(buf + i, ' ', blankSpace);
