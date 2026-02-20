@@ -1,12 +1,22 @@
-name: clang-format-tidy-check
-on: [push|pull_request]
+name: CI
+on: 
+  - push
+  - pull_request
 jobs:
-  check-formatting:
+  CI:
     runs-on: ubuntu-latest
     steps:
-      -uses: actions/checkout@v5
-      -run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -run: run-clang-tidy -p=build -checks=-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
-      -run: clang-format --dry-run ./*/*.{c,h} --style=Webkit --Werror
+      - name: Setup checkout
+        uses: actions/checkout@v5
+      - name: Build project
+        run: | 
+          cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build
+      - name: Run clang-tidy
+        run: | 
+          run-clang-tidy -p=build -checks=-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+      - name: Run clang-format
+        run: |
+          clang-format --dry-run ./*/*.{c,h} --style=Webkit --Werror
 
   
