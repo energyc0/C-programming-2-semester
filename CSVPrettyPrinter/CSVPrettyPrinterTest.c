@@ -8,7 +8,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: %s [input *.csv filename] [output filename]\n", argv[0]);
         return 1;
     }
-    FILE* fpin = fopen( argv[1], "r");
+    FILE* fpin = fopen(argv[1], "r");
     if (fpin == NULL) {
         fprintf(stderr, "Failed to open \"%s\": %s\n", argv[1], strerror(errno));
         return 1;

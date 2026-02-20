@@ -203,7 +203,6 @@ static bool parseLine(const char* line, CSVData* data)
     for (int i = 0; line[i] != '\0'; i++) {
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line, &curSize, &i);
-        printf("DEBUG: (%s)\n", node->fields[fieldIdx]);
         if (curSize == -1) {
             freeLineNode(&node);
             return false;
@@ -265,18 +264,31 @@ static char* drawRow(char* buf, const int* fieldWidths, int fieldsCount, char ro
     return buf;
 }
 
+static bool isNumber(const char* s, int size)
+{
+    for (int i = 0; i < size && s[i] != '\0'; i++) {
+        char c = s[i];
+        if (('0' > c || c > '9') && c != '.')
+            return false;
+    }
+    return true;
+}
+
 /* Draws fields of line in buffer and returns it. */
 static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const int* fieldMaxWidths)
 {
     int i = 0;
     for (int f = 0; f < fieldsCount; f++) {
+        bool isRightJustified = f != 0 && isNumber(node->fields[f], node->fieldWidths[f]);
         buf[i++] = '|';
-        if (node->fields[f] != NULL)
-            sprintf(buf + i, "%s", node->fields[f]);
-        i += node->fieldWidths[f];
-        int blankSpace = fieldMaxWidths[f] - node->fieldWidths[f];
-        memset(buf + i, ' ', blankSpace);
-        i += blankSpace;
+        /* Fields may be empty */
+        if (node->fields[f] != NULL) {
+            const char* fmt = isRightJustified ? "%*s" : "%-*s";
+            sprintf(buf + i, fmt, fieldMaxWidths[f], node->fields[f]);
+        } else {
+            memset(buf + i, ' ', fieldMaxWidths[f]);
+        }
+        i += fieldMaxWidths[f];
     }
     buf[i++] = '|';
     buf[i] = '\0';
