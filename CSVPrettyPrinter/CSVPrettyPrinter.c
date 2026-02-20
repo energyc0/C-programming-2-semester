@@ -7,7 +7,7 @@
 #include <string.h>
 
 /*
- Dynamically allocated line, fieldWidths.
+ Dynamically allocated fields, fieldWidths.
  */
 typedef struct LineNode {
     char** fields;
@@ -30,16 +30,6 @@ static int imax(int a, int b)
     return a > b ? a : b;
 }
 
-/*
- Assign 'src' array max values between 'src' and 'dst' elements,
- 'src' and 'dst arrays must be the 'size' size.
- */
-static void setMaxArray(int* src, const int* dst, int size)
-{
-    for (int i = 0; i < size; i++)
-        src[i] = imax(src[i], dst[i]);
-}
-
 /* Reads line and deletes newline character */
 static char* myReadLine(char* s, int n, FILE* stream)
 {
@@ -57,12 +47,16 @@ static char* myReadLine(char* s, int n, FILE* stream)
  Free *node pointer and sets *node=NULL.
  Checks if *node fields are not NULL.
  */
-static void freeLineNode(LineNode** node)
+static void freeLineNode(LineNode** node, int fieldsCount)
 {
     if ((*node) == NULL)
         return;
-    if ((*node)->fields != NULL)
+    if ((*node)->fields != NULL) {
+        for (int i = 0; i < fieldsCount; i++)
+            if ((*node)->fields[i] != NULL)
+                free((*node)->fields[i]);
         free((*node)->fields);
+    }
     if ((*node)->fieldWidths != NULL)
         free((*node)->fieldWidths);
     free(*node);
@@ -116,6 +110,11 @@ static char* copyField(const char* s, int* size, int* i)
     return strdup(buf);
 }
 
+/*
+ Count fields in a line.
+ It is called one time when reading the first line
+ to initialize CSVData struct.
+ */
 static int countFields(const char* s)
 {
     if (s == NULL || s[0] == '\0')
@@ -204,7 +203,7 @@ static bool parseLine(const char* line, CSVData* data)
         int curSize = 0;
         node->fields[fieldIdx] = copyField(line, &curSize, &i);
         if (curSize == -1) {
-            freeLineNode(&node);
+            freeLineNode(&node, data->fieldsCount);
             return false;
         }
         node->fieldWidths[fieldIdx] = curSize;
@@ -332,7 +331,7 @@ void CSVDataFree(CSVData** data)
     while (p != NULL) {
         LineNode* prev = p;
         p = p->next;
-        freeLineNode(&prev);
+        freeLineNode(&prev, (*data)->fieldsCount);
     }
     free(*data);
     *data = NULL;
