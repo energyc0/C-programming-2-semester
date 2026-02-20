@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-   typedef struct CSVData CSVData;
+typedef struct CSVData CSVData;
 
 /*
  Read CSV data from file descriptor to dynamically allocated struct.
