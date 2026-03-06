@@ -1,0 +1,5 @@
+add_library(CSVPrettyPrinterLib STATIC CSVPrettyPrinter.c)
+
+add_executable(CSVPrettyPrinter CSVPrettyPrinterMain.c)
+
+target_link_libraries(CSVPrettyPrinter PRIVATE CSVPrettyPrinterLib)

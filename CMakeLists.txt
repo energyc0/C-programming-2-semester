@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.29)
 
-project(CSVPrettyPrinter C)
+project(C-Programming C)
 
-set(SOURCE_DIR "sources/CSVPrettyPrinter")
-add_compile_options(-g)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
 
-add_library(CSVPrettyPrinterLib STATIC ${SOURCE_DIR}/CSVPrettyPrinter.c)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-g)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-add_executable(CSVPrettyPrinter ${SOURCE_DIR}/CSVPrettyPrinterMain.c)
-
-target_link_libraries(CSVPrettyPrinter PRIVATE CSVPrettyPrinterLib)
+add_subdirectory("sources/CSVPrettyPrinter")
+add_subdirectory("sources/AVLTree")
