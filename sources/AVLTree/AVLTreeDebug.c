@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "AVLTreeInternal.h"
 
 static bool avlNodeIsBalanced(AVLNode* node);
@@ -31,7 +32,7 @@ static void avlInorderInternal(AVLNode* node, void (*printVal)(void*))
         avlInorderInternal(node->left, printVal);
 
     printVal(node->value);
-
+    printf(", balance = %d, height = %d\n", node->balance, countNodes(node));
     if (node->right != NULL)
         avlInorderInternal(node->right, printVal);
 }
@@ -50,6 +51,6 @@ static bool avlNodeIsBalanced(AVLNode* node)
 
     int leftChildren = countNodes(node->left);
     int rightChildren = countNodes(node->right);
-    int diff = rightChildren - leftChildren;
+    int diff = abs(rightChildren - leftChildren);
     return diff < 2 && avlNodeIsBalanced(node->left) && avlNodeIsBalanced(node->right);
 }

@@ -8,6 +8,12 @@ static void avlNodesFree(AVLNode* node);
 static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
 
+static AVLNode* avlNodeBalance(AVLNode* node);
+static AVLNode* avlNodeRotateLeft(AVLNode* node);
+static AVLNode* avlNodeRotateRight(AVLNode* node);
+static AVLNode* avlNodeRotateRightLeft(AVLNode* node);
+static AVLNode* avlNodeRotateLeftRight(AVLNode* node);
+
 AVLTree* avlAlloc(Comparator comp)
 {
     AVLTree* tree = malloc(sizeof(*tree));
@@ -98,25 +104,40 @@ static void avlNodesFree(AVLNode* node)
 static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew)
 {
     int compRes = comp(node->key, key);
+    bool res = false;
     if (compRes == 0) {
         node->value = value;
         *hasNew = false;
-        return true;
+        res = true;
     } else if (compRes > 0) {
         if (node->left == NULL) {
             node->left = avlNodeAlloc(key, value);
             *hasNew = node->left != NULL;
-            return *hasNew;
+            node->balance = *hasNew ? node->balance - 1 : node->balance;
+            res = *hasNew;
+        } else {
+            res = avlInsertInternal(node->left, key, value, comp, hasNew);
+            if (*hasNew) {
+                node->balance--;
+                node->left = avlNodeBalance(node->left);
+            }
         }
-        return avlInsertInternal(node->left, key, value, comp, hasNew);
     } else {
         if (node->right == NULL) {
             node->right = avlNodeAlloc(key, value);
             *hasNew = node->right != NULL;
-            return *hasNew;
+            node->balance = *hasNew ? node->balance + 1 : node->balance;
+            res = *hasNew;
+        } else {
+            res = avlInsertInternal(node->right, key, value, comp, hasNew);
+            if (*hasNew) {
+                node->balance++;
+                node->right = avlNodeBalance(node->right);
+            }
         }
-        return avlInsertInternal(node->right, key, value, comp, hasNew);
     }
+
+    return res;
 }
 
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
@@ -133,4 +154,64 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
             return NULL;
         return avlFindInternal(node->right, key, comp);
     }
+}
+
+static AVLNode* avlNodeBalance(AVLNode* node)
+{
+    if (node->balance == 2) {
+        if (node->right->balance >= 0)
+            return avlNodeRotateLeft(node);
+        return avlNodeRotateRightLeft(node);
+    }
+    if (node->balance == -2) {
+        if (node->left->balance <= 0)
+            return avlNodeRotateRight(node);
+        return avlNodeRotateLeftRight(node);
+    }
+    return node;
+}
+
+static AVLNode* avlNodeRotateLeft(AVLNode* node)
+{
+    AVLNode* center = node->right->left;
+    AVLNode* newRoot = node->right;
+    node->right = center;
+    newRoot->left = node;
+
+    if (newRoot->balance == 0) {
+        newRoot->balance = -1;
+        node->balance = 1;
+    } else {
+        newRoot->balance = 0;
+        node->balance = 0;
+    }
+
+    return newRoot;
+}
+static AVLNode* avlNodeRotateRight(AVLNode* node)
+{
+    AVLNode* center = node->left->right;
+    AVLNode* newRoot = node->left;
+    node->left = center;
+    newRoot->right = node;
+
+    if (newRoot->balance == 0) {
+        newRoot->balance = 1;
+        node->balance = -1;
+    } else {
+        newRoot->balance = 0;
+        node->balance = 0;
+    }
+
+    return newRoot;
+}
+static AVLNode* avlNodeRotateRightLeft(AVLNode* node)
+{
+    node = avlNodeRotateRight(node);
+    return avlNodeRotateLeft(node);
+}
+static AVLNode* avlNodeRotateLeftRight(AVLNode* node)
+{
+    node = avlNodeRotateLeft(node);
+    return avlNodeRotateRight(node);
 }

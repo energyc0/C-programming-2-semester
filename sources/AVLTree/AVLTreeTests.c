@@ -18,7 +18,7 @@ int intCompare(void* a, void* b)
 
 void printStr(void* p)
 {
-    printf("%s\n", (char*)p);
+    printf("%s", (char*)p);
 }
 
 int main()
@@ -27,8 +27,11 @@ int main()
     char* treeValues[] = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
     AVLTree* tree = avlAlloc(intCompare);
     assert(tree != NULL);
-    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++)
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlInsert(tree, &treeKeys[i], treeValues[i]));
+        printf("###\nInserted (%d, %s)\n", treeKeys[i], treeValues[i]);
+        avlInorder(tree, printStr);
+    }
 
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlContains(tree, &treeKeys[i]));
@@ -37,8 +40,8 @@ int main()
         assert(data != NULL);
         assert(hasFound);   
         assert(strcmp(data, treeValues[i]) == 0);
+
     }
-    avlInorder(tree, printStr);
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
     avlFree(&tree);
