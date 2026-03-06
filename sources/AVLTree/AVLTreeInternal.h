@@ -13,7 +13,8 @@ typedef struct AVLNode {
     void* value;
     struct AVLNode* left;
     struct AVLNode* right;
-    int balance;
+    int balance; /* balance = rightChildren - leftChildren */
+    int chilren;
 } AVLNode;
 
 typedef struct AVLTree {
@@ -25,3 +26,14 @@ typedef struct AVLTree {
  * Print tree values in-order
  */
 void avlInorder(AVLTree* tree, void (*printVal) (void*));
+
+/*
+ * Check 'balance' value validity.
+ * Very slow function used for debug.
+ */
+bool avlIsBalanced(AVLTree* tree);
+/*
+ * Very slow function used for debug.
+ */
+bool avlIsMetadataCorrect(AVLTree* tree);
+

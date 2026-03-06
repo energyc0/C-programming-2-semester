@@ -39,6 +39,7 @@ int main()
         assert(strcmp(data, treeValues[i]) == 0);
     }
     avlInorder(tree, printStr);
+    assert(avlIsMetadataCorrect(tree));
     printf("Good!\n");
     return 0;
 }
