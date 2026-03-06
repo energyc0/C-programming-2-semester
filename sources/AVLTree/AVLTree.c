@@ -18,6 +18,7 @@ static AVLNode* avlNodeAlloc(void* key, void* value);
 static void avlNodesFree(AVLNode* node);
 
 static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp);
+static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
 
 AVLTree* avlAlloc(Comparator comp)
 {
@@ -72,7 +73,17 @@ bool avlInsert(AVLTree* tree, void* key, void* value)
 
 void* avlFind(AVLTree* tree, void* key, bool* isFound)
 {
-    return NULL;
+    if (tree == NULL || tree->root == NULL) {
+        *isFound = false;
+        return NULL;
+    }
+    AVLNode* node = avlFindInternal(tree->root, key, tree->comp);
+    if (node == NULL) {
+        *isFound = false;
+        return NULL;
+    }
+    *isFound = true;
+    return node->value;
 }
 
 
@@ -106,5 +117,21 @@ static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator 
             return node->right != NULL;
         }
         return avlInsertInternal(node->right, key, value, comp);
+    }
+}
+
+static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
+{
+    int compRes = comp(node->key, key);
+    if (compRes == 0) {
+        return node;
+    } else if (compRes > 0) {
+        if (node->left == NULL)
+            return NULL;
+        return avlFindInternal(node->left, key, comp);
+    } else {
+        if (node->right == NULL)
+            return NULL;
+        return avlFindInternal(node->right, key, comp);
     }
 }
