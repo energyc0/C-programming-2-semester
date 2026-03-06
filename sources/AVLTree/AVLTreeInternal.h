@@ -1,0 +1,27 @@
+#pragma once
+#include "AVLTree.h"
+#include <stdio.h>
+
+/*
+ * This header is for internal purposes of AVL-tree library.
+ * It cannot be included from the user side.
+ * This header is used for testing purposes.
+ */
+
+typedef struct AVLNode {
+    void* key;
+    void* value;
+    struct AVLNode* left;
+    struct AVLNode* right;
+    int balance;
+} AVLNode;
+
+typedef struct AVLTree {
+    Comparator comp;
+    struct AVLNode* root;
+} AVLTree;
+
+/*
+ * Print tree values in-order
+ */
+void avlInorder(AVLTree* tree, void (*printVal) (void*));

@@ -1,24 +1,13 @@
-#include <stdlib.h>
 #include "AVLTree.h"
-
-typedef struct AVLNode {
-    void* key;
-    void* value;
-    struct AVLNode* left;
-    struct AVLNode* right;
-    int balance;
-} AVLNode;
-
-typedef struct AVLTree {
-    Comparator comp;
-    struct AVLNode* root;
-} AVLTree;
+#include <stdlib.h>
+#include "AVLTreeInternal.h"
 
 static AVLNode* avlNodeAlloc(void* key, void* value);
 static void avlNodesFree(AVLNode* node);
 
 static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
+static void avlInorderInternal(AVLNode* node, void (*printVal)(void*));
 
 AVLTree* avlAlloc(Comparator comp)
 {
@@ -135,3 +124,21 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
         return avlFindInternal(node->right, key, comp);
     }
 }
+
+static void avlInorderInternal(AVLNode* node, void (*printVal)(void*))
+{
+    if (node->left != NULL)
+        avlInorderInternal(node->left, printVal);
+
+    printVal(node->value);
+
+    if (node->right != NULL)
+        avlInorderInternal(node->right, printVal);
+}
+
+void avlInorder(AVLTree* tree, void (*printVal) (void*))
+{
+    if(tree != NULL && tree->root != NULL)
+        avlInorderInternal(tree->root, printVal);
+}
+
