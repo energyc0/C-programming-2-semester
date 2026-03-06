@@ -11,7 +11,9 @@ typedef struct AVLTree AVLTree;
 
 /*
  * Compare function that is used in AVLTree for arbitrary types.
- * It compares keys.
+ * It compares keys and must return 0 if they are equal,
+ * return value > 0 if the first argument is greater than the second,
+ * return value < 0 if the second argument is greater than the first.
  */
 typedef int (*Comparator)(void*, void*);
 
