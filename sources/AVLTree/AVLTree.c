@@ -2,10 +2,18 @@
 #include <stdlib.h>
 #include "AVLTreeInternal.h"
 
+struct InsertData {
+    void* key;
+    void* value; 
+    Comparator comp;
+    bool hasNew;
+    bool hasError;
+};
+
 static AVLNode* avlNodeAlloc(void* key, void* value);
 static void avlNodesFree(AVLNode* node);
 
-static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew);
+static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
 
 static AVLNode* avlNodeBalance(AVLNode* node);
@@ -34,20 +42,19 @@ void avlFree(AVLTree** tree)
 
 bool avlInsert(AVLTree* tree, void* key, void* value)
 {
-    bool hasNew = false;
-    bool res = false;
-    if (tree->root == NULL) {
-        tree->root = avlNodeAlloc(key, value);
-        hasNew = true;
-        res = true;
-    } else {
-        res = avlInsertInternal(tree->root, key, value, tree->comp, &hasNew);
-    }
+    struct InsertData data = {
+        .key = key,
+        .value = value,
+        .comp = tree->comp,
+        .hasNew = false,
+        .hasError = false
+    };
+    tree->root = avlInsertInternal(tree->root, &data);
 
-    if (hasNew)
+    if (data.hasNew)
         tree->nodes++;
         
-    return res;
+    return !data.hasError;
 }
 
 void* avlFind(AVLTree* tree, void* key, bool* isFound)
@@ -101,43 +108,29 @@ static void avlNodesFree(AVLNode* node)
     free(node);
 }
 
-static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew)
+static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
 {
-    int compRes = comp(node->key, key);
-    bool res = false;
-    if (compRes == 0) {
-        node->value = value;
-        *hasNew = false;
-        res = true;
-    } else if (compRes > 0) {
-        if (node->left == NULL) {
-            node->left = avlNodeAlloc(key, value);
-            *hasNew = node->left != NULL;
-            node->balance = *hasNew ? node->balance - 1 : node->balance;
-            res = *hasNew;
-        } else {
-            res = avlInsertInternal(node->left, key, value, comp, hasNew);
-            if (*hasNew) {
-                node->balance--;
-                node->left = avlNodeBalance(node->left);
-            }
-        }
-    } else {
-        if (node->right == NULL) {
-            node->right = avlNodeAlloc(key, value);
-            *hasNew = node->right != NULL;
-            node->balance = *hasNew ? node->balance + 1 : node->balance;
-            res = *hasNew;
-        } else {
-            res = avlInsertInternal(node->right, key, value, comp, hasNew);
-            if (*hasNew) {
-                node->balance++;
-                node->right = avlNodeBalance(node->right);
-            }
-        }
+    if (node == NULL) {
+        AVLNode* newNode = avlNodeAlloc(data->key, data->value);
+        data->hasNew = newNode != NULL;
+        data->hasError = !data->hasNew;
+        return newNode;
     }
 
-    return res;
+    int compRes = data->comp(node->key, data->key);
+    if (compRes == 0) {
+        data->hasError = false;
+        data->hasNew = false;
+        return node;
+    } else if (compRes > 0) {
+        node->left = avlInsertInternal(node->left, data);
+        node->balance = data->hasNew ? node->balance - 1 : node->balance;
+    } else {
+        node->right = avlInsertInternal(node->right, data);
+        node->balance = data->hasNew ? node->balance + 1 : node->balance;
+    }
+
+    return avlNodeBalance(node);
 }
 
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
