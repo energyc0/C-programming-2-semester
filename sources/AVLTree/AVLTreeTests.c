@@ -40,6 +40,9 @@ int main()
     }
     avlInorder(tree, printStr);
     assert(avlIsMetadataCorrect(tree));
+    assert(avlIsBalanced(tree));
+    avlFree(&tree);
+    assert(tree == NULL);
     printf("Good!\n");
     return 0;
 }

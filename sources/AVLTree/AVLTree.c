@@ -5,7 +5,7 @@
 static AVLNode* avlNodeAlloc(void* key, void* value);
 static void avlNodesFree(AVLNode* node);
 
-static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp);
+static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
 
 AVLTree* avlAlloc(Comparator comp)
@@ -28,11 +28,20 @@ void avlFree(AVLTree** tree)
 
 bool avlInsert(AVLTree* tree, void* key, void* value)
 {
+    bool hasNew = false;
+    bool res = false;
     if (tree->root == NULL) {
         tree->root = avlNodeAlloc(key, value);
-        return true;
+        hasNew = true;
+        res = true;
+    } else {
+        res = avlInsertInternal(tree->root, key, value, tree->comp, &hasNew);
     }
-    return avlInsertInternal(tree->root, key, value, tree->comp);
+
+    if (hasNew)
+        tree->nodes++;
+        
+    return res;
 }
 
 void* avlFind(AVLTree* tree, void* key, bool* isFound)
@@ -73,7 +82,6 @@ static AVLNode* avlNodeAlloc(void* key, void* value)
     node->left = node->right = NULL;
     node->key = key;
     node->value = value;
-
     return node;
 }
 
@@ -87,27 +95,27 @@ static void avlNodesFree(AVLNode* node)
     free(node);
 }
 
-static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp)
+static bool avlInsertInternal(AVLNode* node, void* key, void* value, Comparator comp, bool* hasNew)
 {
     int compRes = comp(node->key, key);
     if (compRes == 0) {
         node->value = value;
+        *hasNew = false;
         return true;
     } else if (compRes > 0) {
         if (node->left == NULL) {
             node->left = avlNodeAlloc(key, value);
-            if (node->left == NULL)
-                return false;
+            *hasNew = node->left != NULL;
+            return *hasNew;
         }
-        return avlInsertInternal(node->left, key, value, comp);
+        return avlInsertInternal(node->left, key, value, comp, hasNew);
     } else {
         if (node->right == NULL) {
             node->right = avlNodeAlloc(key, value);
-            if (node->right == NULL)
-                return false;
-            
+            *hasNew = node->right != NULL;
+            return *hasNew;
         }
-        return avlInsertInternal(node->right, key, value, comp);
+        return avlInsertInternal(node->right, key, value, comp, hasNew);
     }
 }
 

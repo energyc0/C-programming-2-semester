@@ -2,8 +2,7 @@
 
 static bool avlNodeIsBalanced(AVLNode* node);
 static void avlInorderInternal(AVLNode* node, void (*printVal)(void*));
-static int countChildren(AVLNode* node);
-static bool isMetadataCorrect(AVLNode* node);
+static int countNodes(AVLNode* node);
 
 void avlInorder(AVLTree* tree, void (*printVal) (void*))
 {
@@ -20,7 +19,10 @@ bool avlIsBalanced(AVLTree* tree)
 
 bool avlIsMetadataCorrect(AVLTree* tree)
 {
-    return tree == NULL || isMetadataCorrect(tree->root);
+    if (tree == NULL)
+        return true;
+    int children = countNodes(tree->root);
+    return tree->nodes == children;
 }
 
 static void avlInorderInternal(AVLNode* node, void (*printVal)(void*))
@@ -34,22 +36,11 @@ static void avlInorderInternal(AVLNode* node, void (*printVal)(void*))
         avlInorderInternal(node->right, printVal);
 }
 
-static int countChildren(AVLNode* node)
+static int countNodes(AVLNode* node)
 {
     if (node == NULL)
         return 0;
-    return 1 + countChildren(node->left) + countChildren(node->right);
-}
-
-static bool isMetadataCorrect(AVLNode* node)
-{
-    if (node == NULL)
-        return true;
-
-    int leftChildren = countChildren(node->left);
-    int rightChildren = countChildren(node->right);
-
-    return node->chilren == leftChildren + rightChildren && node->balance == rightChildren - leftChildren;
+    return 1 + countNodes(node->left) + countNodes(node->right);
 }
 
 static bool avlNodeIsBalanced(AVLNode* node)
@@ -57,8 +48,8 @@ static bool avlNodeIsBalanced(AVLNode* node)
     if (node == NULL)
         return true;
 
-    int leftChildren = countChildren(node->left);
-    int rightChildren = countChildren(node->right);
+    int leftChildren = countNodes(node->left);
+    int rightChildren = countNodes(node->right);
     int diff = rightChildren - leftChildren;
     return diff < 2 && avlNodeIsBalanced(node->left) && avlNodeIsBalanced(node->right);
 }

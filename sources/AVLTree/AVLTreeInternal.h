@@ -14,12 +14,12 @@ typedef struct AVLNode {
     struct AVLNode* left;
     struct AVLNode* right;
     int balance; /* balance = rightChildren - leftChildren */
-    int chilren;
 } AVLNode;
 
 typedef struct AVLTree {
     Comparator comp;
     struct AVLNode* root;
+    int nodes;
 } AVLTree;
 
 /*
