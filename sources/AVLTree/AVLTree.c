@@ -204,11 +204,49 @@ static AVLNode* avlNodeRotateRight(AVLNode* node)
 }
 static AVLNode* avlNodeRotateRightLeft(AVLNode* node)
 {
-    node->right = avlNodeRotateRight(node->right);
-    return avlNodeRotateLeft(node);
+    AVLNode* X = node;
+    AVLNode* Z = node->right;
+    AVLNode* Y = node->right->left;
+
+    Z->left = Y->right;
+    Y->right = Z;
+    X->right = Y->left;
+    Y->left = X;
+
+    if (Y->balance == 0) {
+        X->balance = 0;
+        Z->balance = 0;
+    } else if (Y->balance == 1) {
+        X->balance = -1;
+        Z->balance = 0;
+    } else { /* Y->balance == -1 */
+        X->balance = 0;
+        Z->balance = 1;
+    }
+
+    return Y;
 }
 static AVLNode* avlNodeRotateLeftRight(AVLNode* node)
 {
-    node->left = avlNodeRotateLeft(node->left);
-    return avlNodeRotateRight(node);
+    AVLNode* X = node;
+    AVLNode* Z = node->left;
+    AVLNode* Y = node->left->right;
+
+    Z->right = Y->left;
+    Y->left = Z;
+    X->left = Y->right;
+    Y->right = X;
+
+    if (Y->balance == 0) {
+        X->balance = 0;
+        Z->balance = 0;
+    } else if (Y->balance == 1) {
+        X->balance = 0;
+        Z->balance = -1;
+    } else { /* Y->balance == -1 */
+        X->balance = 1;
+        Z->balance = 0;
+    }
+
+    return Y;
 }

@@ -98,7 +98,7 @@ void avlTestBigRotations()
     assert(avlIsBalanced(tree));
     avlFree(&tree);
     assert(tree == NULL);
-    printf("Passed: %s\n", __func__);
+    printf("Passed: %s()\n", __func__);
 }
 
 int main()
