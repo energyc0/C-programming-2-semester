@@ -4,6 +4,7 @@
 static bool avlNodeIsBalanced(AVLNode* node);
 static void avlInorderInternal(AVLNode* node, void (*printVal)(void*));
 static int countNodes(AVLNode* node);
+static int calcHeight(AVLNode* node);
 
 void avlInorder(AVLTree* tree, void (*printVal) (void*))
 {
@@ -32,7 +33,7 @@ static void avlInorderInternal(AVLNode* node, void (*printVal)(void*))
         avlInorderInternal(node->left, printVal);
 
     printVal(node->value);
-    printf(", balance = %d, height = %d\n", node->balance, countNodes(node));
+    printf(", balance = %d, height = %d\n", node->balance, calcHeight(node));
     if (node->right != NULL)
         avlInorderInternal(node->right, printVal);
 }
@@ -49,8 +50,17 @@ static bool avlNodeIsBalanced(AVLNode* node)
     if (node == NULL)
         return true;
 
-    int leftChildren = countNodes(node->left);
-    int rightChildren = countNodes(node->right);
+    int leftChildren = calcHeight(node->left);
+    int rightChildren = calcHeight(node->right);
     int diff = abs(rightChildren - leftChildren);
     return diff < 2 && avlNodeIsBalanced(node->left) && avlNodeIsBalanced(node->right);
+}
+
+static int calcHeight(AVLNode* node)
+{
+    if (node == NULL)
+        return 0;
+    int left = calcHeight(node->left);
+    int right = calcHeight(node->right);
+    return 1 + (left > right ? left : right);
 }

@@ -8,6 +8,7 @@ struct InsertData {
     Comparator comp;
     bool hasNew;
     bool hasError;
+    bool hasIncHeight;
 };
 
 static AVLNode* avlNodeAlloc(void* key, void* value);
@@ -16,7 +17,7 @@ static void avlNodesFree(AVLNode* node);
 static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
 
-static AVLNode* avlNodeBalance(AVLNode* node);
+static AVLNode* avlNodeBalance(AVLNode* node, struct InsertData* data);
 static AVLNode* avlNodeRotateLeft(AVLNode* node);
 static AVLNode* avlNodeRotateRight(AVLNode* node);
 static AVLNode* avlNodeRotateRightLeft(AVLNode* node);
@@ -30,6 +31,7 @@ AVLTree* avlAlloc(Comparator comp)
 
     tree->comp = comp;
     tree->root = NULL;
+    tree->nodes = 0;
     return tree;
 }
 
@@ -47,7 +49,8 @@ bool avlInsert(AVLTree* tree, void* key, void* value)
         .value = value,
         .comp = tree->comp,
         .hasNew = false,
-        .hasError = false
+        .hasError = false,
+        .hasIncHeight = false
     };
     tree->root = avlInsertInternal(tree->root, &data);
 
@@ -114,6 +117,7 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         AVLNode* newNode = avlNodeAlloc(data->key, data->value);
         data->hasNew = newNode != NULL;
         data->hasError = !data->hasNew;
+        data->hasIncHeight = true;
         return newNode;
     }
 
@@ -124,13 +128,13 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         return node;
     } else if (compRes > 0) {
         node->left = avlInsertInternal(node->left, data);
-        node->balance = data->hasNew ? node->balance - 1 : node->balance;
+        node->balance = data->hasIncHeight ? node->balance - 1 : node->balance;
     } else {
         node->right = avlInsertInternal(node->right, data);
-        node->balance = data->hasNew ? node->balance + 1 : node->balance;
+        node->balance = data->hasIncHeight ? node->balance + 1 : node->balance;
     }
-
-    return avlNodeBalance(node);
+    
+    return avlNodeBalance(node, data);
 }
 
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
@@ -149,14 +153,16 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
     }
 }
 
-static AVLNode* avlNodeBalance(AVLNode* node)
+static AVLNode* avlNodeBalance(AVLNode* node, struct InsertData* data)
 {
     if (node->balance == 2) {
+        data->hasIncHeight = false;
         if (node->right->balance >= 0)
             return avlNodeRotateLeft(node);
         return avlNodeRotateRightLeft(node);
     }
     if (node->balance == -2) {
+        data->hasIncHeight = false;
         if (node->left->balance <= 0)
             return avlNodeRotateRight(node);
         return avlNodeRotateLeftRight(node);
