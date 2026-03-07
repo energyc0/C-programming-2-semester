@@ -1,10 +1,10 @@
 #include "AVLTree.h"
-#include <stdlib.h>
 #include "AVLTreeInternal.h"
+#include <stdlib.h>
 
 struct InsertData {
     void* key;
-    void* value; 
+    void* value;
     Comparator comp;
     bool hasNew;
     bool hasError;
@@ -56,7 +56,7 @@ bool avlInsert(AVLTree* tree, void* key, void* value)
 
     if (data.hasNew)
         tree->nodes++;
-        
+
     return !data.hasError;
 }
 
@@ -75,10 +75,8 @@ void* avlFind(AVLTree* tree, void* key, bool* isFound)
     return node->value;
 }
 
-
 void avlDelete(AVLTree* tree, void* key)
 {
-
 }
 
 bool avlContains(AVLTree* tree, void* key)
@@ -133,7 +131,7 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         node->right = avlInsertInternal(node->right, data);
         node->balance = data->hasIncHeight ? node->balance + 1 : node->balance;
     }
-    
+
     return avlNodeBalance(node, data);
 }
 
@@ -206,11 +204,11 @@ static AVLNode* avlNodeRotateRight(AVLNode* node)
 }
 static AVLNode* avlNodeRotateRightLeft(AVLNode* node)
 {
-    node = avlNodeRotateRight(node);
+    node->right = avlNodeRotateRight(node->right);
     return avlNodeRotateLeft(node);
 }
 static AVLNode* avlNodeRotateLeftRight(AVLNode* node)
 {
-    node = avlNodeRotateLeft(node);
+    node->left = avlNodeRotateLeft(node->left);
     return avlNodeRotateRight(node);
 }

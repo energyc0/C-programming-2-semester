@@ -1,14 +1,14 @@
-#include <stdlib.h>
 #include "AVLTreeInternal.h"
+#include <stdlib.h>
 
 static bool avlNodeIsBalanced(AVLNode* node);
 static void avlInorderInternal(AVLNode* node, void (*printVal)(void*));
 static int countNodes(AVLNode* node);
 static int calcHeight(AVLNode* node);
 
-void avlInorder(AVLTree* tree, void (*printVal) (void*))
+void avlInorder(AVLTree* tree, void (*printVal)(void*))
 {
-    if(tree != NULL && tree->root != NULL)
+    if (tree != NULL && tree->root != NULL)
         avlInorderInternal(tree->root, printVal);
 }
 

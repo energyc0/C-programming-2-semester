@@ -25,7 +25,7 @@ typedef struct AVLTree {
 /*
  * Print tree values in-order
  */
-void avlInorder(AVLTree* tree, void (*printVal) (void*));
+void avlInorder(AVLTree* tree, void (*printVal)(void*));
 
 /*
  * Check 'balance' value validity.
@@ -36,4 +36,3 @@ bool avlIsBalanced(AVLTree* tree);
  * Very slow function used for debug.
  */
 bool avlIsMetadataCorrect(AVLTree* tree);
-
