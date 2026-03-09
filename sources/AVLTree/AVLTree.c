@@ -50,7 +50,7 @@ bool avlInsert(AVLTree* tree, void* key, void* value)
         .comp = tree->comp,
         .hasNew = false,
         .hasError = false,
-        .hasIncHeight = false
+        .hasIncHeight = false,
     };
     tree->root = avlInsertInternal(tree->root, &data);
 
@@ -115,7 +115,7 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         AVLNode* newNode = avlNodeAlloc(data->key, data->value);
         data->hasNew = newNode != NULL;
         data->hasError = !data->hasNew;
-        data->hasIncHeight = true;
+        data->hasIncHeight = data->hasNew;
         return newNode;
     }
 
@@ -123,8 +123,10 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
     if (compRes == 0) {
         data->hasError = false;
         data->hasNew = false;
+        data->hasIncHeight = false;
         return node;
-    } else if (compRes > 0) {
+    }
+    if (compRes > 0) {
         node->left = avlInsertInternal(node->left, data);
         node->balance = data->hasIncHeight ? node->balance - 1 : node->balance;
     } else {
@@ -153,17 +155,22 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
 
 static AVLNode* avlNodeBalance(AVLNode* node, struct InsertData* data)
 {
-    if (node->balance == 2) {
+    /* When inserted node has a sibling. */
+    if (node->balance == 0) {
         data->hasIncHeight = false;
-        if (node->right->balance >= 0)
-            return avlNodeRotateLeft(node);
-        return avlNodeRotateRightLeft(node);
-    }
-    if (node->balance == -2) {
-        data->hasIncHeight = false;
-        if (node->left->balance <= 0)
-            return avlNodeRotateRight(node);
-        return avlNodeRotateLeftRight(node);
+    } else {
+        if (node->balance == 2) {
+            data->hasIncHeight = false;
+            if (node->right->balance >= 0)
+                return avlNodeRotateLeft(node);
+            return avlNodeRotateRightLeft(node);
+        }
+        if (node->balance == -2) {
+            data->hasIncHeight = false;
+            if (node->left->balance <= 0)
+                return avlNodeRotateRight(node);
+            return avlNodeRotateLeftRight(node);
+        }
     }
     return node;
 }
@@ -178,7 +185,7 @@ static AVLNode* avlNodeRotateLeft(AVLNode* node)
     if (newRoot->balance == 0) {
         newRoot->balance = -1;
         node->balance = 1;
-    } else {
+    } else { /* newRoot->balance == 1 */
         newRoot->balance = 0;
         node->balance = 0;
     }
@@ -195,7 +202,7 @@ static AVLNode* avlNodeRotateRight(AVLNode* node)
     if (newRoot->balance == 0) {
         newRoot->balance = 1;
         node->balance = -1;
-    } else {
+    } else { /* newRoot->balance == -1 */
         newRoot->balance = 0;
         node->balance = 0;
     }

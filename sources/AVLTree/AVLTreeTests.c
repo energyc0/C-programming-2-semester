@@ -81,9 +81,37 @@ void avlTestBigRotations()
     AVLTree* tree = avlAlloc(intCompare);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        printf("###\nInserting %d\n", treeKeys[i]);
         assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
-        avlInorder(tree, printInt);
+    }
+
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        assert(avlContains(tree, &treeKeys[i]));
+        bool hasFound = false;
+        int* data = avlFind(tree, &treeKeys[i], &hasFound);
+        assert(data != NULL);
+        assert(hasFound);
+        assert(*data == treeKeys[i]);
+    }
+    assert(avlIsMetadataCorrect(tree));
+    assert(avlIsBalanced(tree));
+    avlFree(&tree);
+    assert(tree == NULL);
+    printf("Passed: %s()\n", __func__);
+}
+
+void avlStress()
+{
+    int treeKeys[] = {50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67,
+15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68};
+
+    AVLTree* tree = avlAlloc(intCompare);
+    assert(tree != NULL);
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
+        assert(avlContains(tree, &treeKeys[i]));
+        assert(avlIsMetadataCorrect(tree));
+        assert(avlIsBalanced(tree));
+
     }
 
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
@@ -105,5 +133,6 @@ int main()
 {
     avlTestSmallRotations();
     avlTestBigRotations();
+    avlStress();
     return 0;
 }
