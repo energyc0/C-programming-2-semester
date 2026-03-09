@@ -32,7 +32,7 @@ void avlTestSmallRotations()
 
     /* In order */
 
-    AVLTree* tree = avlAlloc(intCompare);
+    AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlInsert(tree, &treeKeys[i], treeValues[i]));
@@ -56,7 +56,7 @@ void avlTestSmallRotations()
 
     /* In reverse order */
 
-    tree = avlAlloc(intCompare);
+    tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = sizeof(treeKeys) / sizeof(treeKeys[0]) - 1; i >= 0; i--) {
         assert(avlInsert(tree, &treeKeys[i], treeValues[i]));
@@ -85,7 +85,7 @@ void avlTestBigRotations()
 {
     int treeKeys[] = { 10, 20, 15, 25, 17, 23, 12, 28, 13, 27, 11, 29, 14, 26, 16, 24, 18, 22 };
 
-    AVLTree* tree = avlAlloc(intCompare);
+    AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
@@ -115,7 +115,7 @@ void avlTestStressInsert()
     int treeKeys[] = { 50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67,
         15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68 };
 
-    AVLTree* tree = avlAlloc(intCompare);
+    AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
@@ -143,7 +143,7 @@ void avlTestStressInsert()
 void avlTestStressDelete()
 {
     int treeKeys[] = { 50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67, 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68 };
-    AVLTree* tree = avlAlloc(intCompare);
+    AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
@@ -165,7 +165,7 @@ void avlTestStressDelete()
 
 void avlTestDelete(int* values, int size, int deleteValue)
 {
-    AVLTree* tree = avlAlloc(intCompare);
+    AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = 0; i < size; i++) {
         assert(avlInsert(tree, &values[i], &values[i]));

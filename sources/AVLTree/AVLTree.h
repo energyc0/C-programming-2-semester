@@ -18,10 +18,26 @@ typedef struct AVLTree AVLTree;
 typedef int (*Comparator)(void*, void*);
 
 /*
+ * Function that will be called in order to free key memory,
+ * when deleting in AVLTree.
+ */
+typedef void (*KeyCleaner) (void*);
+
+/*
+ * Function that will be called in order to free value memory,
+ * when deleting in AVLTree.
+ */
+typedef void (*ValueCleaner) (void*);
+
+/*
  * Initialize AVL-tree. After initializing it will
  * take types that defined in comparator.
+ * User may define KeyCleaner to free memory of key after
+ * deleting a node in AVLTree. If nothing is need, KeyCleaner is set to NULL.
+ * User may define ValueCleaner to free memory of value after
+ * deleting a node in AVLTree. If nothing is need, ValueCleaner is set to NULL.
  */
-AVLTree* avlAlloc(Comparator comp);
+AVLTree* avlAlloc(Comparator comp, KeyCleaner keyFree, ValueCleaner valueFree);
 
 /*
  * Free space used by AVL-tree.

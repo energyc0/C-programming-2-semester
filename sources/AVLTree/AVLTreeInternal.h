@@ -17,6 +17,8 @@ typedef struct AVLNode {
 
 typedef struct AVLTree {
     Comparator comp;
+    KeyCleaner keyFree;
+    ValueCleaner valueFree;
     struct AVLNode* root;
     int nodes;
 } AVLTree;
