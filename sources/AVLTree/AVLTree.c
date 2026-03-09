@@ -88,17 +88,19 @@ void* avlFind(AVLTree* tree, void* key, bool* isFound)
     return node->value;
 }
 
-void avlDelete(AVLTree* tree, void* key)
+bool avlDelete(AVLTree* tree, void* key)
 {
     struct DeleteData data = {
         .key = key,
         .tree = tree,
+        .hasDecHeight = false,
         .hasDeleted = false,
     };
 
     tree->root = avlDeleteInternal(tree->root, &data);
     if (data.hasDeleted)
         tree->nodes--;
+    return data.hasDeleted;
 }
 
 bool avlContains(AVLTree* tree, void* key)

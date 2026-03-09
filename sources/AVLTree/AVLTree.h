@@ -36,6 +36,7 @@ typedef void (*ValueCleaner) (void*);
  * deleting a node in AVLTree. If nothing is need, KeyCleaner is set to NULL.
  * User may define ValueCleaner to free memory of value after
  * deleting a node in AVLTree. If nothing is need, ValueCleaner is set to NULL.
+ * If key == value then user must specify only one 'cleaner' to prevent double-free.
  */
 AVLTree* avlAlloc(Comparator comp, KeyCleaner keyFree, ValueCleaner valueFree);
 
@@ -66,8 +67,10 @@ void* avlFind(AVLTree* tree, void* key, bool* isFound);
 
 /*
  * Find the key in the tree and delete its data in the tree.
+ * Calling KeyCleaner and ValueCleaner for the data of the node directly if specified.
+ * Return true if the node was deleted. Return false if the node is not in the tree.
  */
-void avlDelete(AVLTree* tree, void* key);
+bool avlDelete(AVLTree* tree, void* key);
 
 /*
  * Return count of nodes in the tree.

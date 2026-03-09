@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 int intCompare(void* a, void* b)
 {
@@ -215,6 +216,39 @@ void avlTestDeletes()
     printf("Passed: %s()\n", __func__);
 }
 
+void avlTestCleanup()
+{
+    int treeKeys[] = {1,2,3,4,5,6,7,8,9,10};
+    char* treeValues[] = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" };
+
+    AVLTree* tree = avlAlloc(intCompare, free, free);
+    assert(tree != NULL);
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        int* newKey = malloc(sizeof(newKey));
+        assert(newKey != NULL);
+        *newKey = treeKeys[i];
+
+        char* newValue = strdup(treeValues[i]);
+        assert(newValue != NULL);
+
+        assert(avlInsert(tree, newKey, newValue));
+        assert(avlContains(tree, newKey));
+        assert(avlIsMetadataCorrect(tree));
+        assert(avlIsBalanced(tree));
+    }
+
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        avlDelete(tree, &treeKeys[i]);
+        assert(!avlContains(tree, &treeKeys[i]));
+        assert(avlIsMetadataCorrect(tree));
+        assert(avlIsBalanced(tree));
+    }
+
+    avlFree(&tree);
+    assert(tree == NULL);
+    printf("Passed: %s()\n", __func__);
+}
+
 int main()
 {
     avlTestSmallRotations();
@@ -222,5 +256,6 @@ int main()
     avlTestStressInsert();
     avlTestDeletes();
     avlTestStressDelete();
+    avlTestCleanup();
     return 0;
 }
