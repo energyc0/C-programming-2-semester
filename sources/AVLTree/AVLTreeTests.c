@@ -2,8 +2,8 @@
 #include "AVLTreeInternal.h"
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 int intCompare(void* a, void* b)
 {
@@ -218,7 +218,7 @@ void avlTestDeletes()
 
 void avlTestCleanup()
 {
-    int treeKeys[] = {1,2,3,4,5,6,7,8,9,10};
+    int treeKeys[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     char* treeValues[] = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" };
 
     AVLTree* tree = avlAlloc(intCompare, free, free);

@@ -21,13 +21,13 @@ typedef int (*Comparator)(void*, void*);
  * Function that will be called in order to free key memory,
  * when deleting in AVLTree.
  */
-typedef void (*KeyCleaner) (void*);
+typedef void (*KeyCleaner)(void*);
 
 /*
  * Function that will be called in order to free value memory,
  * when deleting in AVLTree.
  */
-typedef void (*ValueCleaner) (void*);
+typedef void (*ValueCleaner)(void*);
 
 /*
  * Initialize AVL-tree. After initializing it will
