@@ -316,13 +316,13 @@ static AVLNode* avlDeleteInternal(AVLNode* node, struct DeleteData* data)
         data->key = node->key = maxLeft->key;
         node->value = maxLeft->value;
         node->left = avlDeleteInternal(node->left, data);
-        
+
         if (data->hasDecHeight == true) {
             if (node->left == NULL || node->left->balance == 0)
                 data->hasDecHeight = (++node->balance) == 0;
         }
     }
-    
+
     return avlNodeBalance(node);
 }
 

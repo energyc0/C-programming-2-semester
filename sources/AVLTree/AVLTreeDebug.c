@@ -1,4 +1,5 @@
 #include "AVLTreeInternal.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 static bool avlNodeIsBalanced(AVLNode* node);

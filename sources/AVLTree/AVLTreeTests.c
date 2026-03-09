@@ -2,7 +2,6 @@
 #include "AVLTreeInternal.h"
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 int intCompare(void* a, void* b)
@@ -76,15 +75,15 @@ void avlTestSmallRotations()
     }
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
+
     avlFree(&tree);
     assert(tree == NULL);
-
     printf("Passed: %s()\n", __func__);
 }
 
 void avlTestBigRotations()
 {
-    int treeKeys[] = {10, 20, 15, 25, 17, 23, 12, 28, 13, 27, 11, 29, 14, 26, 16, 24, 18, 22};
+    int treeKeys[] = { 10, 20, 15, 25, 17, 23, 12, 28, 13, 27, 11, 29, 14, 26, 16, 24, 18, 22 };
 
     AVLTree* tree = avlAlloc(intCompare);
     assert(tree != NULL);
@@ -105,6 +104,7 @@ void avlTestBigRotations()
     }
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
+
     avlFree(&tree);
     assert(tree == NULL);
     printf("Passed: %s()\n", __func__);
@@ -112,8 +112,8 @@ void avlTestBigRotations()
 
 void avlTestStressInsert()
 {
-    int treeKeys[] = {50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67,
-15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68};
+    int treeKeys[] = { 50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67,
+        15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68 };
 
     AVLTree* tree = avlAlloc(intCompare);
     assert(tree != NULL);
@@ -122,7 +122,6 @@ void avlTestStressInsert()
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
-
     }
 
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
@@ -135,6 +134,7 @@ void avlTestStressInsert()
     }
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
+
     avlFree(&tree);
     assert(tree == NULL);
     printf("Passed: %s()\n", __func__);
@@ -142,7 +142,7 @@ void avlTestStressInsert()
 
 void avlTestStressDelete()
 {
-    int treeKeys[] = {50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67, 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68};
+    int treeKeys[] = { 50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67, 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68 };
     AVLTree* tree = avlAlloc(intCompare);
     assert(tree != NULL);
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
@@ -158,6 +158,8 @@ void avlTestStressDelete()
         assert(avlIsBalanced(tree));
     }
 
+    avlFree(&tree);
+    assert(tree == NULL);
     printf("Passed: %s()\n", __func__);
 }
 
@@ -175,6 +177,9 @@ void avlTestDelete(int* values, int size, int deleteValue)
     assert(!avlContains(tree, &deleteValue));
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
+
+    avlFree(&tree);
+    assert(tree == NULL);
 }
 
 void avlTestDeletes()
@@ -184,24 +189,26 @@ void avlTestDeletes()
         int sizeTest;
         int testDelete;
     } tests[] = {
-        { .testValues = {2,1,3}, // 1
-                .sizeTest = 3,
-                .testDelete = 2},
-        { .testValues = {3,2,4,5}, //2
+        { .testValues = { 2, 1, 3 }, // 1
+            .sizeTest = 3,
+            .testDelete = 2 },
+        { .testValues = { 3, 2, 4, 5 }, // 2
             .sizeTest = 4,
-            .testDelete = 4},
-        { .testValues = {4, 2, 6, 1, 3, 5, 7}, //3
+            .testDelete = 4 },
+        { .testValues = { 4, 2, 6, 1, 3, 5, 7 }, // 3
             .sizeTest = 7,
-            .testDelete = 2},
-        { .testValues = {3, 2, 4, 5},
+            .testDelete = 2 },
+        {
+            .testValues = { 3, 2, 4, 5 },
             .sizeTest = 4,
-            .testDelete = 2,},
-        { .testValues = {5, 2, 7, 1, 4, 6, 8, 3},
+            .testDelete = 2,
+        },
+        { .testValues = { 5, 2, 7, 1, 4, 6, 8, 3 },
             .sizeTest = 8,
-            .testDelete = 1}
+            .testDelete = 1 }
 
     };
-    
+
     for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
         avlTestDelete(tests[i].testValues, tests[i].sizeTest, tests[i].testDelete);
 

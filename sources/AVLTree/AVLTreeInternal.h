@@ -1,6 +1,5 @@
 #pragma once
 #include "AVLTree.h"
-#include <stdio.h>
 
 /*
  * This header is for internal purposes of AVL-tree library.
