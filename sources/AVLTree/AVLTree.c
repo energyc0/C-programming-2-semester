@@ -11,13 +11,23 @@ struct InsertData {
     bool hasIncHeight;
 };
 
+struct DeleteData {
+    void* key;
+    void* value;
+    Comparator comp;
+    bool hasDeleted;
+    bool hasDecHeight;
+};
+
 static AVLNode* avlNodeAlloc(void* key, void* value);
-static void avlNodesFree(AVLNode* node);
+static void avlTreeFree(AVLNode* root);
+static void avlNodeFree(AVLNode* node);
 
 static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data);
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp);
+static AVLNode* avlDeleteInternal(AVLNode* node, struct DeleteData* data);
 
-static AVLNode* avlNodeBalance(AVLNode* node, struct InsertData* data);
+static AVLNode* avlNodeBalance(AVLNode* node);
 static AVLNode* avlNodeRotateLeft(AVLNode* node);
 static AVLNode* avlNodeRotateRight(AVLNode* node);
 static AVLNode* avlNodeRotateRightLeft(AVLNode* node);
@@ -37,7 +47,7 @@ AVLTree* avlAlloc(Comparator comp)
 
 void avlFree(AVLTree** tree)
 {
-    avlNodesFree((*tree)->root);
+    avlTreeFree((*tree)->root);
     free(*tree);
     *tree = NULL;
 }
@@ -99,14 +109,14 @@ static AVLNode* avlNodeAlloc(void* key, void* value)
     return node;
 }
 
-static void avlNodesFree(AVLNode* node)
+static void avlTreeFree(AVLNode* node)
 {
     if (node == NULL)
         return;
 
-    avlNodesFree(node->left);
-    avlNodesFree(node->right);
-    free(node);
+    avlTreeFree(node->left);
+    avlTreeFree(node->right);
+    avlNodeFree(node);
 }
 
 static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
@@ -134,7 +144,10 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         node->balance = data->hasIncHeight ? node->balance + 1 : node->balance;
     }
 
-    return avlNodeBalance(node, data);
+    /* When inserted node has a sibling or when need to balance. */
+    if (node->balance == 0 || abs(node->balance) == 2)
+        data->hasIncHeight = false;
+    return avlNodeBalance(node);
 }
 
 static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
@@ -153,24 +166,17 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
     }
 }
 
-static AVLNode* avlNodeBalance(AVLNode* node, struct InsertData* data)
+static AVLNode* avlNodeBalance(AVLNode* node)
 {
-    /* When inserted node has a sibling. */
-    if (node->balance == 0) {
-        data->hasIncHeight = false;
-    } else {
-        if (node->balance == 2) {
-            data->hasIncHeight = false;
-            if (node->right->balance >= 0)
-                return avlNodeRotateLeft(node);
-            return avlNodeRotateRightLeft(node);
-        }
-        if (node->balance == -2) {
-            data->hasIncHeight = false;
-            if (node->left->balance <= 0)
-                return avlNodeRotateRight(node);
-            return avlNodeRotateLeftRight(node);
-        }
+    if (node->balance == 2) {
+        if (node->right->balance >= 0)
+            return avlNodeRotateLeft(node);
+        return avlNodeRotateRightLeft(node);
+    }
+    if (node->balance == -2) {
+        if (node->left->balance <= 0)
+            return avlNodeRotateRight(node);
+        return avlNodeRotateLeftRight(node);
     }
     return node;
 }
@@ -256,4 +262,53 @@ static AVLNode* avlNodeRotateLeftRight(AVLNode* node)
     }
 
     return Y;
+}
+
+static AVLNode* avlDeleteInternal(AVLNode* node, struct DeleteData* data)
+{
+    if (node == NULL) {
+        data->hasDeleted = false;
+        data->hasDecHeight = false;
+        return NULL;
+    }
+    int compRes = data->comp(node->key, data->key);
+    AVLNode* pathTo = NULL;
+    if (compRes > 0) {
+        node->left = avlDeleteInternal(node->left, data);
+        pathTo = node->left;
+    } else if (compRes < 0) {
+        node->right = avlDeleteInternal(node->right, data);
+        pathTo = node->right;
+    } else {
+        data->hasDeleted = true;
+        if (node->left == NULL && node->right == NULL) {
+            avlNodeFree(node);
+            data->hasDecHeight = true;
+        }
+
+        if (node->left == NULL) {
+            AVLNode* temp = node->right;
+            avlNodeFree(node);
+            data->hasDecHeight = true;
+            return temp;
+        }
+
+        AVLNode* maxLeft = node->left;
+        AVLNode* maxLeftParent = node;
+        while (maxLeft->right != NULL) {
+            maxLeftParent = maxLeft;
+            maxLeft = maxLeft->right;
+        }
+        data->key = node->key = maxLeft->key;
+        data->value = node->value = maxLeft->value;
+        maxLeftParent = avlDeleteInternal(maxLeft, data);
+        pathTo = maxLeftParent;
+    }
+    
+    return avlNodeBalance(node);
+}
+
+static void avlNodeFree(AVLNode* node)
+{
+    free(node);
 }
