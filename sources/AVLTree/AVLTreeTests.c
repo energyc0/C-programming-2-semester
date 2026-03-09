@@ -151,13 +151,8 @@ void avlTestStressDelete()
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
     }
-
-    printf("Nodes in the tree: %d\n", avlSize(tree));
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         avlDelete(tree, &treeKeys[i]);
-        printf("###\nDeleting %d\n", treeKeys[i]);
-        printf("Nodes in the tree: %d\n", avlSize(tree));
-        avlInorder(tree, printInt);
         assert(!avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -176,12 +171,7 @@ void avlTestDelete(int* values, int size, int deleteValue)
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
     }
-    printf("###\nGiven tree:\n");
-    avlInorder(tree, printInt);
     avlDelete(tree, &deleteValue);
-    printf("###\nDeleting %d\n", deleteValue);
-    printf("Nodes in the tree: %d\n", avlSize(tree));
-    avlInorder(tree, printInt);
     assert(!avlContains(tree, &deleteValue));
     assert(avlIsMetadataCorrect(tree));
     assert(avlIsBalanced(tree));
@@ -214,6 +204,8 @@ void avlTestDeletes()
     
     for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
         avlTestDelete(tests[i].testValues, tests[i].sizeTest, tests[i].testDelete);
+
+    printf("Passed: %s()\n", __func__);
 }
 
 int main()
