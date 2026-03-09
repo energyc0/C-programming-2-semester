@@ -289,14 +289,12 @@ static AVLNode* avlDeleteInternal(AVLNode* node, struct DeleteData* data)
     if (compRes > 0) {
         node->left = avlDeleteInternal(node->left, data);
         if (data->hasDecHeight == true) {
-            if (node->left == NULL || node->left->balance == 0)
-                data->hasDecHeight = (++node->balance) == 0;
+            data->hasDecHeight = (++node->balance) == 0;
         }
     } else if (compRes < 0) {
         node->right = avlDeleteInternal(node->right, data);
         if (data->hasDecHeight == true) {
-            if (node->right == NULL || node->right->balance == 0)
-                data->hasDecHeight = (--node->balance) == 0;
+            data->hasDecHeight = (--node->balance) == 0;
         }
     } else {
         if (node->left == NULL) {
