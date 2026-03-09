@@ -99,7 +99,7 @@ void avlTestBigRotations()
     printf("Passed: %s()\n", __func__);
 }
 
-void avlStress()
+void avlTestStress()
 {
     int treeKeys[] = {50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67,
 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68};
@@ -129,10 +129,38 @@ void avlStress()
     printf("Passed: %s()\n", __func__);
 }
 
+void avlTestDelete()
+{
+    int treeKeys[] = {50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67, 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68};
+    AVLTree* tree = avlAlloc(intCompare);
+    assert(tree != NULL);
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
+        assert(avlContains(tree, &treeKeys[i]));
+        assert(avlIsMetadataCorrect(tree));
+        assert(avlIsBalanced(tree));
+
+    }
+
+    printf("Nodes in the tree: %d\n", avlSize(tree));
+    for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
+        avlDelete(tree, &treeKeys[i]);
+        printf("###\nDeleting %d\n", treeKeys[i]);
+        printf("Nodes in the tree: %d\n", avlSize(tree));
+        avlInorder(tree, printInt);
+        assert(!avlContains(tree, &treeKeys[i]));
+        assert(avlIsMetadataCorrect(tree));
+        assert(avlIsBalanced(tree));
+    }
+
+    printf("Passed: %s()\n", __func__);
+}
+
 int main()
 {
     avlTestSmallRotations();
     avlTestBigRotations();
-    avlStress();
+    avlTestStress();
+    avlTestDelete();
     return 0;
 }

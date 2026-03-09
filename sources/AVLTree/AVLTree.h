@@ -52,3 +52,8 @@ void* avlFind(AVLTree* tree, void* key, bool* isFound);
  * Find the key in the tree and delete its data in the tree.
  */
 void avlDelete(AVLTree* tree, void* key);
+
+/*
+ * Return count of nodes in the tree.
+ */
+int avlSize(AVLTree* tree);
