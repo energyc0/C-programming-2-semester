@@ -92,7 +92,7 @@ void avlDelete(AVLTree* tree, void* key)
         .hasDeleted = false,
     };
 
-    avlDeleteInternal(tree->root, &data);
+    tree->root = avlDeleteInternal(tree->root, &data);
     if (data.hasDeleted)
         tree->nodes--;
 }
@@ -316,6 +316,11 @@ static AVLNode* avlDeleteInternal(AVLNode* node, struct DeleteData* data)
         data->key = node->key = maxLeft->key;
         node->value = maxLeft->value;
         node->left = avlDeleteInternal(node->left, data);
+        
+        if (data->hasDecHeight == true) {
+            if (node->left == NULL || node->left->balance == 0)
+                data->hasDecHeight = (++node->balance) == 0;
+        }
     }
     
     return avlNodeBalance(node);
