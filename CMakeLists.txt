@@ -13,3 +13,4 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 add_subdirectory("sources/CSVPrettyPrinter")
 add_subdirectory("sources/AVLTree")
+add_subdirectory("sources/Aerosoft")
