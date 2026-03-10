@@ -5,7 +5,7 @@
 struct InsertData {
     void* key;
     void* value;
-    Comparator comp;
+    AVLTree* tree;
     bool hasNew;
     bool hasError;
     bool hasIncHeight;
@@ -55,18 +55,19 @@ void avlFree(AVLTree** tree)
     *tree = NULL;
 }
 
-bool avlInsert(AVLTree* tree, void* key, void* value)
+bool avlInsert(AVLTree* tree, void* key, void* value, bool* hasNew)
 {
     struct InsertData data = {
         .key = key,
         .value = value,
-        .comp = tree->comp,
+        .tree = tree,
         .hasNew = false,
         .hasError = false,
         .hasIncHeight = false,
     };
     tree->root = avlInsertInternal(tree->root, &data);
 
+    *hasNew = data.hasNew;
     if (data.hasNew)
         tree->nodes++;
 
@@ -143,11 +144,16 @@ static AVLNode* avlInsertInternal(AVLNode* node, struct InsertData* data)
         return newNode;
     }
 
-    int compRes = data->comp(node->key, data->key);
+    int compRes = data->tree->comp(node->key, data->key);
     if (compRes == 0) {
         data->hasError = false;
         data->hasNew = false;
         data->hasIncHeight = false;
+        /* Free memory if cleaner is defined*/
+        if (data->tree->valueFree != NULL)
+            data->tree->valueFree(node->value);
+
+        node->value = data->value;
         return node;
     }
     if (compRes > 0) {

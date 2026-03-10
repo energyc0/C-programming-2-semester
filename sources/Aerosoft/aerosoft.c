@@ -55,7 +55,8 @@ AVLTree* loadData(FILE* file)
             return NULL;
         }
 
-        if (!avlInsert(tree, newKey, newValue)) {
+        bool hasNew = false;
+        if (!avlInsert(tree, newKey, newValue, &hasNew)) {
             fprintf(stderr, "Failed to load data!\n");
             avlFree(&tree);
             free(newKey);
@@ -91,11 +92,20 @@ void addRecord(AVLTree* tree, char* keyValue)
 
     char* newKey = strdup(keyValue);
     char* newValue = strdup(keyValue + keySize + 1);
-
-    if (avlInsert(tree, newKey, newValue)) {
-        printf("Added \"%s:%s\" into the database.\n", newKey, newValue);
-    } else {
+    bool hasNew = false;
+    if (!avlInsert(tree, newKey, newValue, &hasNew)) {
         fprintf(stderr, "Failed to add \"%s:%s\" into the database.\n", newKey, newValue);
+        free(newKey);
+        free(newValue);
+        return;
+    }
+
+    /* If the key is already in the tree, the value is freed and replaced, while the key is not. */
+    if (hasNew) {
+        printf("New record \"%s:%s\" was added.\n", newKey, newValue);
+    } else {
+        printf("The record was replaced with \"%s:%s\".\n", newKey, newValue);
+        free(newKey);
     }
 }
 

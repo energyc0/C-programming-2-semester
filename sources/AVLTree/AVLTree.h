@@ -56,8 +56,11 @@ bool avlContains(AVLTree* tree, void* key);
  * Return true, if inserted successfully.
  * Return false, if error occurred.
  * If has already the key in the tree, replace the value.
+ * hasNew = true if inserted a new node,
+ * otherwise hasNew = false and the value is replaced.
+ * If a value was replaced, avlInsert() clears memory of value if ValueCleaner was set.
  */
-bool avlInsert(AVLTree* tree, void* key, void* value);
+bool avlInsert(AVLTree* tree, void* key, void* value, bool* hasNew);
 
 /*
  * Find the key in the tree and return its value, sets isFound = true.

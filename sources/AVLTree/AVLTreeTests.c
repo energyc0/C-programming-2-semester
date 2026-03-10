@@ -35,8 +35,9 @@ void avlTestSmallRotations()
 
     AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        assert(avlInsert(tree, &treeKeys[i], treeValues[i]));
+        assert(avlInsert(tree, &treeKeys[i], treeValues[i], &hasNew));
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -60,7 +61,7 @@ void avlTestSmallRotations()
     tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
     for (int i = sizeof(treeKeys) / sizeof(treeKeys[0]) - 1; i >= 0; i--) {
-        assert(avlInsert(tree, &treeKeys[i], treeValues[i]));
+        assert(avlInsert(tree, &treeKeys[i], treeValues[i], &hasNew));
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -88,8 +89,9 @@ void avlTestBigRotations()
 
     AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
+        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i], &hasNew));
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -118,8 +120,9 @@ void avlTestStressInsert()
 
     AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
+        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i], &hasNew));
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -146,8 +149,9 @@ void avlTestStressDelete()
     int treeKeys[] = { 50, 40, 60, 30, 45, 55, 65, 20, 35, 42, 47, 52, 57, 62, 67, 15, 25, 32, 38, 41, 43, 46, 48, 51, 53, 56, 58, 61, 63, 66, 68 };
     AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i]));
+        assert(avlInsert(tree, &treeKeys[i], &treeKeys[i], &hasNew));
         assert(avlContains(tree, &treeKeys[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -168,8 +172,9 @@ void avlTestDelete(int* values, int size, int deleteValue)
 {
     AVLTree* tree = avlAlloc(intCompare, NULL, NULL);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < size; i++) {
-        assert(avlInsert(tree, &values[i], &values[i]));
+        assert(avlInsert(tree, &values[i], &values[i], &hasNew));
         assert(avlContains(tree, &values[i]));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
@@ -223,6 +228,7 @@ void avlTestCleanup()
 
     AVLTree* tree = avlAlloc(intCompare, free, free);
     assert(tree != NULL);
+    bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
         int* newKey = malloc(sizeof(newKey));
         assert(newKey != NULL);
@@ -231,7 +237,7 @@ void avlTestCleanup()
         char* newValue = strdup(treeValues[i]);
         assert(newValue != NULL);
 
-        assert(avlInsert(tree, newKey, newValue));
+        assert(avlInsert(tree, newKey, newValue, &hasNew));
         assert(avlContains(tree, newKey));
         assert(avlIsMetadataCorrect(tree));
         assert(avlIsBalanced(tree));
