@@ -74,17 +74,39 @@ AVLTree* loadData(FILE* file)
 
 void findRecord(AVLTree* tree, char* key)
 {
-
+    bool isFound = false;
+    char* value = avlFind(tree, key, &isFound);
+    if (!isFound || value == NULL) {
+        printf("Record with key \"%s\" is not found.\n", key);
+    } else {
+        printf("%s -> %s\n", key, value);
+    }
 }
 
 void addRecord(AVLTree* tree, char* keyValue)
 {
+    int keySize = strcspn(keyValue, ":");
+    keyValue[keySize] = '\0';
+    /* Now keyValue points to key string */
 
+    char* newKey = strdup(keyValue);
+    char* newValue = strdup(keyValue + keySize + 1);
+
+    if (avlInsert(tree, newKey, newValue)) {
+        printf("Added \"%s:%s\" into the database.\n", newKey, newValue);
+    } else {
+        fprintf(stderr, "Failed to add \"%s:%s\" into the database.\n", newKey, newValue);
+    }
 }
 
 void deleteRecord(AVLTree* tree, char* key)
 {
-
+    if (avlDelete(tree, key)) {
+        printf("Successfully deleted the record with key \"%s\"\n", key);
+    } else {
+        fprintf(stderr, "Failed to find the record with key \"%s\"\n", key);
+    }
+        
 }
 
 void saveRecords(FILE* file, AVLTree* tree)
@@ -112,7 +134,7 @@ bool processCommand(AVLTree* tree, FILE* file, char* command, char* specifier)
         findRecord(tree, specifier);
     } else if (strcmp("add", command) == 0) {
         addRecord(tree, specifier);
-    } else if (strcmp("delete", specifier) == 0) {
+    } else if (strcmp("delete", command) == 0) {
         deleteRecord(tree, specifier);
     } else if (strcmp("save", command) == 0) {
         saveRecords(file, tree);
@@ -153,6 +175,10 @@ int main(int argc, char** argv)
             break;
         
         buf[strcspn(buf, "\n")] = '\0';
+        /* Empty string */
+        if (buf[0] == '\0')
+            continue;
+
         int idx = 0;
         while (isspace(buf[idx]))
             idx++;
@@ -160,7 +186,7 @@ int main(int argc, char** argv)
         
         char command[8] = {};
         char specifier[256] = {}; 
-        if (sscanf(buf + idx, "%7[^ \n] %[^ \n]\n", command, specifier) < 0)
+        if (sscanf(buf + idx, "%7[^ \n] %[^\n]\n", command, specifier) < 0)
             break;
         printf ("Command = %s, specifier = %s\n", command, specifier);
         if (!processCommand(tree, file, command, specifier))
