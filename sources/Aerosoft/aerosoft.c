@@ -192,6 +192,7 @@ int main(int argc, char** argv)
     AVLTree* tree = loadData(file);
     if (tree == NULL) {
         fprintf(stderr, "Failed to load data from \"%s\".\n", argv[1]);
+        fclose(file);
         return 1;
     }
     printf("%d records are loaded, ready to work.\n", avlSize(tree));

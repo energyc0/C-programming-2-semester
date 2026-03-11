@@ -230,7 +230,7 @@ void avlTestCleanup()
     assert(tree != NULL);
     bool hasNew = false;
     for (int i = 0; i < sizeof(treeKeys) / sizeof(treeKeys[0]); i++) {
-        int* newKey = malloc(sizeof(newKey));
+        int* newKey = (int*)malloc(sizeof(*newKey));
         assert(newKey != NULL);
         *newKey = treeKeys[i];
 

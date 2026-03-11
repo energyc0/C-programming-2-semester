@@ -1,5 +1,6 @@
 #include "AVLTree.h"
 #include "AVLTreeInternal.h"
+#include <assert.h>
 #include <stdlib.h>
 
 struct InsertData {
@@ -190,12 +191,15 @@ static AVLNode* avlFindInternal(AVLNode* node, void* key, Comparator comp)
 
 static AVLNode* avlNodeBalance(AVLNode* node)
 {
+    assert(node != NULL);
     if (node->balance == 2) {
+        assert(node->right != NULL);
         if (node->right->balance >= 0)
             return avlNodeRotateLeft(node);
         return avlNodeRotateRightLeft(node);
     }
     if (node->balance == -2) {
+        assert(node->left != NULL);
         if (node->left->balance <= 0)
             return avlNodeRotateRight(node);
         return avlNodeRotateLeftRight(node);
