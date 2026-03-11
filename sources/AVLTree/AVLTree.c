@@ -354,7 +354,7 @@ int avlSize(AVLTree* tree)
     return tree->nodes;
 }
 
-int avlInorder(AVLTree* tree, FILE* file,  PrintKeyValue printFunc)
+int avlInorder(AVLTree* tree, FILE* file, PrintKeyValue printFunc)
 {
     if (tree != NULL && tree->root != NULL)
         return avlInorderInternal(tree->root, file, printFunc);

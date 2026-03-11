@@ -34,7 +34,7 @@ typedef void (*ValueCleaner)(void*);
  * This function is need for printing data of AVL-tree.
  * The function accepts three arguments:
  * the file descriptor, the key and value respectively.
- * The function can return an 'int' value, which is interpreted 
+ * The function can return an 'int' value, which is interpreted
  * as error when non equals 0.
  */
 typedef int (*PrintKeyValue)(FILE*, void*, void*);
@@ -95,4 +95,4 @@ int avlSize(AVLTree* tree);
  * Check PrintKeyValue docs.
  * Return 0 or the first non-zero PrintKeyValue return.
  */
-int avlInorder(AVLTree* tree, FILE* file,  PrintKeyValue printFunc);
+int avlInorder(AVLTree* tree, FILE* file, PrintKeyValue printFunc);

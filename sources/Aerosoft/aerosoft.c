@@ -1,9 +1,9 @@
 #include "AVLTree.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define STRINGINIZE(val) STRINGINIZE_DUMMY(val)
 #define STRINGINIZE_DUMMY(val) #val
@@ -40,14 +40,15 @@ AVLTree* loadData(FILE* file)
         fprintf(stderr, "Failed to allocate memory!\n");
         return NULL;
     }
-    
-    char key[KEY_SIZE+1] = {};
-    char value[VALUE_SIZE+1] = {};
+
+    char key[KEY_SIZE + 1] = {};
+    char value[VALUE_SIZE + 1] = {};
     while (!feof(file)) {
         if (fscanf(file,
-             "%"STRINGINIZE(KEY_SIZE)"[^:]:%"STRINGINIZE(VALUE_SIZE)"[^\n]\n",
-             key, value) != 2) {
-                break;
+                "%" STRINGINIZE(KEY_SIZE) "[^:]:%" STRINGINIZE(VALUE_SIZE) "[^\n]\n",
+                key, value)
+            != 2) {
+            break;
         }
 
         char* newKey = strdup(key);
@@ -126,7 +127,6 @@ void deleteRecord(AVLTree* tree, char* key)
     } else {
         fprintf(stderr, "Failed to find the record with key \"%s\"\n", key);
     }
-        
 }
 
 void saveRecords(FILE* file, AVLTree* tree)
@@ -167,7 +167,7 @@ bool processCommand(AVLTree* tree, FILE* file, char* command, char* specifier)
         saveRecords(file, tree);
     } else if (strcmp("quit", command) == 0) {
         return false;
-    } else if(strcmp("help", command) == 0) {
+    } else if (strcmp("help", command) == 0) {
         printHelp();
     } else {
         fprintf(stderr, "Undefined command. Try 'help'.\n");
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
         printf("> ");
         if (fgets(buf, sizeof(buf), stdin) == NULL)
             break;
-        
+
         buf[strcspn(buf, "\n")] = '\0';
         /* Empty string */
         if (buf[0] == '\0')
@@ -211,12 +211,11 @@ int main(int argc, char** argv)
         while (isspace(buf[idx]))
             idx++;
 
-        
         char command[8] = {};
-        char specifier[256] = {}; 
+        char specifier[256] = {};
         if (sscanf(buf + idx, "%7[^ \n] %[^\n]\n", command, specifier) < 0)
             break;
-        
+
         if (!processCommand(tree, file, command, specifier))
             break;
     }
