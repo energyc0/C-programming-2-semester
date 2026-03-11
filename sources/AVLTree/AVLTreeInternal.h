@@ -24,11 +24,6 @@ typedef struct AVLTree {
 } AVLTree;
 
 /*
- * Print tree values in-order
- */
-void avlInorder(AVLTree* tree, void (*printVal)(void*));
-
-/*
  * Check 'balance' value validity.
  * Very slow function used for debug.
  */

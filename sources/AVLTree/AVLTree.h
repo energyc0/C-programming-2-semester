@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /*
  * AVL-tree structure. It stores key-value data.
@@ -28,6 +29,15 @@ typedef void (*KeyCleaner)(void*);
  * when deleting in AVLTree.
  */
 typedef void (*ValueCleaner)(void*);
+
+/*
+ * This function is need for printing data of AVL-tree.
+ * The function accepts three arguments:
+ * the file descriptor, the key and value respectively.
+ * The function can return an 'int' value, which is interpreted 
+ * as error when non equals 0.
+ */
+typedef int (*PrintKeyValue)(FILE*, void*, void*);
 
 /*
  * Initialize AVL-tree. After initializing it will
@@ -79,3 +89,10 @@ bool avlDelete(AVLTree* tree, void* key);
  * Return count of nodes in the tree.
  */
 int avlSize(AVLTree* tree);
+
+/*
+ * Print tree values in-order in FILE*.
+ * Check PrintKeyValue docs.
+ * Return 0 or the first non-zero PrintKeyValue return.
+ */
+int avlInorder(AVLTree* tree, FILE* file,  PrintKeyValue printFunc);

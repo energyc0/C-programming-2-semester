@@ -32,6 +32,8 @@ static AVLNode* avlNodeRotateRight(AVLNode* node);
 static AVLNode* avlNodeRotateRightLeft(AVLNode* node);
 static AVLNode* avlNodeRotateLeftRight(AVLNode* node);
 
+static int avlInorderInternal(AVLNode* node, FILE* file, PrintKeyValue printFunc);
+
 AVLTree* avlAlloc(Comparator comp, KeyCleaner keyFree, ValueCleaner valueFree)
 {
     AVLTree* tree = malloc(sizeof(*tree));
@@ -350,4 +352,29 @@ int avlSize(AVLTree* tree)
     if (tree == NULL)
         return 0;
     return tree->nodes;
+}
+
+int avlInorder(AVLTree* tree, FILE* file,  PrintKeyValue printFunc)
+{
+    if (tree != NULL && tree->root != NULL)
+        return avlInorderInternal(tree->root, file, printFunc);
+    return true;
+}
+
+static int avlInorderInternal(AVLNode* node, FILE* file, PrintKeyValue printFunc)
+{
+    int result = 0;
+    if (node->left != NULL)
+        result = avlInorderInternal(node->left, file, printFunc);
+    if (result != 0)
+        return result;
+
+    result = printFunc(file, node->key, node->value);
+    if (result != 0)
+        return result;
+
+    if (node->right != NULL)
+        result = avlInorderInternal(node->right, file, printFunc);
+
+    return result;
 }

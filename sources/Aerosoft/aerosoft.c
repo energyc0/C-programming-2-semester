@@ -20,6 +20,16 @@ int myStrcmp(void* s1, void* s2)
 }
 
 /*
+ * Print values into the file.
+ * Return 0 on success.
+ * Return 1 on fail.
+ */
+int printRecord(FILE* file, void* key, void* value)
+{
+    return fprintf(file, "%s:%s\n", (char*)key, (char*)value) < 0;
+}
+
+/*
  * Read database and load data into AVL-tree.
  * Return NULL if error ocurred.
  */
@@ -121,7 +131,14 @@ void deleteRecord(AVLTree* tree, char* key)
 
 void saveRecords(FILE* file, AVLTree* tree)
 {
-
+    /* Reopen the file with write access, erase data */
+    file = freopen(NULL, "w+", file);
+    if (file == NULL || avlInorder(tree, file, printRecord) != 0) {
+        fprintf(stderr, "Failed to save data into the file: %s.\n", strerror(errno));
+    } else {
+        printf("Successfuly written data into the file (%d records).\n", avlSize(tree));
+        fflush(file);
+    }
 }
 
 void printHelp()
@@ -165,7 +182,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    FILE* file = fopen(argv[1], "rw");
+    /* Open for read-only */
+    FILE* file = fopen(argv[1], "r");
     if (file == NULL) {
         fprintf(stderr, "Failed to open \"%s\": %s\n", argv[1], strerror(errno));
         return 1;
@@ -198,7 +216,7 @@ int main(int argc, char** argv)
         char specifier[256] = {}; 
         if (sscanf(buf + idx, "%7[^ \n] %[^\n]\n", command, specifier) < 0)
             break;
-        printf ("Command = %s, specifier = %s\n", command, specifier);
+        
         if (!processCommand(tree, file, command, specifier))
             break;
     }
