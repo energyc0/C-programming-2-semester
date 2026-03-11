@@ -10,6 +10,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-g)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Build directory: ${CMAKE_BINARY_DIR}")
 
 add_subdirectory("sources/CSVPrettyPrinter")
 add_subdirectory("sources/AVLTree")
