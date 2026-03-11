@@ -17,4 +17,5 @@ do
     fi
 done
 
+rm -f tempfile
 exit ${result}
