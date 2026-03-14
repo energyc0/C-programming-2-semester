@@ -53,6 +53,22 @@ bool graphHasConnection(Graph* graph, unsigned a, unsigned b);
 AdjacentList* graphGetAdjacent(Graph* graph, unsigned vertex, bool* err);
 
 /*
+ * Return count of vertices in the graph of the vertex 
+ */
+unsigned adjacentGetSize(AdjacentList* list);
+
+/*
+ * Return true if the vertex of adjacent list is connected to the given vertex
+ */
+bool adjacentHasConnection(AdjacentList* list, unsigned vertex);
+
+/*
+ * Return the main vertex of adjacent list
+ * If list is freed, return ((unsigned)-1)
+ */
+unsigned adjacentGetVertex(AdjacentList* list);
+
+/*
  * Free the memory allocated for the AdjacentList
  * and set pointer to NULL.
  */

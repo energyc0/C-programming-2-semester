@@ -28,10 +28,17 @@ int main()
     assert(graphConnect(graph, 5, 6));
 
     for (int i = 0; i < COUNT; i++) {
+        bool err = false;
+        AdjacentList* adjList = graphGetAdjacent(graph, i, &err);
+        assert(adjList != NULL);
+        assert(adjacentGetVertex(adjList) == i);
+        
+        assert(!err && adjList != NULL);
         for(int j = 0; j < COUNT; j++) {
-            if (adjacency[i][j] == 1)
+            if (adjacency[i][j] == 1) {
                 assert(graphHasConnection(graph, i, j));
-            //printf("%d %d\n", i, j);
+                assert(adjacentHasConnection(adjList, j));
+            }
         }
     }
 
