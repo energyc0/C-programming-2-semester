@@ -8,6 +8,10 @@
  */
 typedef struct Graph Graph;
 
+/*
+ * Adjacent vertices to a vertex.
+ * This list is invalidated after calling graphAdd()
+ */
 typedef struct AdjacentList AdjacentList;
 
 /*
@@ -31,10 +35,11 @@ void graphFree(Graph** graph);
 unsigned graphSize(Graph* graph); 
 
 /* 
- * Connect vertices 'a' and 'b' in graph.
+ * Connect vertices 'a' and 'b' in graph with weighted edge.
  * Return true if successful, return false if error ocurred.
+ * weight must be more than 0.
  */
-bool graphConnect(Graph* graph, unsigned a, unsigned b);
+bool graphConnect(Graph* graph, unsigned a, unsigned b, unsigned weight);
 
 /*
  * Add 'amount' new vertices in the graph.
@@ -42,7 +47,13 @@ bool graphConnect(Graph* graph, unsigned a, unsigned b);
 bool graphAdd(Graph* graph, unsigned amount);
 
 /*
- * Return true if vertex 'a' is connected to vertex 'b'
+ * Weight of the edge between 'a' and 'b'.
+ * *err = true if there is no edge between 'a' and 'b' and return 0.
+ */
+unsigned graphConnection(Graph* graph, unsigned a, unsigned b, bool* err);
+
+/*
+ * Return true if there is an edge between 'a' and 'b'
  */
 bool graphHasConnection(Graph* graph, unsigned a, unsigned b);
 

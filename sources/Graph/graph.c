@@ -157,6 +157,8 @@ void graphFreeAdjacent(AdjacentList** list)
 
 bool graphAdd(Graph* graph, unsigned count)
 {
+    if (graph == NULL)
+        return false;
     if (graph->capacity <= graph->size + count) {
         unsigned newCap = graph->capacity > 0 ? graph->capacity << 1 : 1;
         while (newCap < graph->size + count)
@@ -178,15 +180,28 @@ bool graphAdd(Graph* graph, unsigned count)
 
 bool graphHasConnection(Graph* graph, unsigned a, unsigned b)
 {
-    return graph->size > a && graph->size > b && graph->vertices[a].vertices[b] == 1;
+    return graph != NULL &&
+     graph->size > a &&
+      graph->size > b &&
+       graph->vertices[a].vertices[b] > 0;
 }
 
-bool graphConnect(Graph* graph, unsigned a, unsigned b)
+unsigned graphConnection(Graph* graph, unsigned a, unsigned b, bool* err)
 {
-    if (graph->size <= a || graph->size <= b)
+    if (graph == NULL || graph->size <= a || graph->size <= b) {
+        if (err) *err = true;
+        return 0;
+    }
+
+    return graph->vertices[a].vertices[b];
+}
+
+bool graphConnect(Graph* graph, unsigned a, unsigned b, unsigned weight)
+{
+    if (graph->size <= a || graph->size <= b || weight == 0)
         return false;
-    graph->vertices[a].vertices[b] = 1;
-    graph->vertices[b].vertices[a] = 1;
+    graph->vertices[a].vertices[b] = weight;
+    graph->vertices[b].vertices[a] = weight;
     return true;
 }
 
