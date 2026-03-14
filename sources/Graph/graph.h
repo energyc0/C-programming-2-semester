@@ -3,31 +3,57 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+/*
+ * Graph stores vertices
+ */
 typedef struct Graph Graph;
 
-typedef struct VertexList {
-    unsigned* vertices;
-    unsigned count;
-} VertexList;
+typedef struct AdjacentList AdjacentList;
 
+/*
+ * Create graph, needs to call graphFree()
+ */
 Graph* graphCreate();
 
+/*
+ * Read graph data from the file
+ */
 Graph* graphRead(const char* filename);
 
+/*
+ * Frees memory allocated for the graph
+ */
 void graphFree(Graph** graph);
 
+/*
+ * Return count of vertices in the graph
+ */
 unsigned graphSize(Graph* graph); 
 
-/* Connect 'a' and 'b' in graph */
+/* 
+ * Connect vertices 'a' and 'b' in graph.
+ * Return true if successful, return false if error ocurred.
+ */
 bool graphConnect(Graph* graph, unsigned a, unsigned b);
 
-bool graphAdd(Graph* graph);
+/*
+ * Add 'amount' new vertices in the graph.
+ */
+bool graphAdd(Graph* graph, unsigned amount);
 
+/*
+ * Return true if vertex 'a' is connected to vertex 'b'
+ */
 bool graphHasConnection(Graph* graph, unsigned a, unsigned b);
 
-/* Get neighbours of the given vertex,
+/* Get adjacent vertices of the given vertex.
  * *err = true if error ocurred,
  * *err = false otherwise
  */
-VertexList graphGetNeighbours(Graph* graph, unsigned vertex, bool* err);
+AdjacentList* graphGetAdjacent(Graph* graph, unsigned vertex, bool* err);
 
+/*
+ * Free the memory allocated for the AdjacentList
+ * and set pointer to NULL.
+ */
+///void graphFreeAdjacent(AdjacentList** list);
