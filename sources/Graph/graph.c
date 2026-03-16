@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "graph.h"
 
@@ -21,11 +22,10 @@ typedef struct AdjacentList {
     unsigned vertex;    /* Main vertex */
     unsigned* vertices; /* Vertices that are adjacent to main vertex */
     unsigned* count; /* Pointer to the 'size' of Graph */
-    //unsigned capacity; /* Current capacity of the 'vertices' list */
 } AdjacentList;
 
 /* 
- * Realloc list of AdjacentVertices in graph.
+ * Realloc list of adjacent vertices in graph.
  * Return true and change to reallocated list if the operation was successful.
  * Return false and do not change the graph list if error occured.
  */
@@ -36,12 +36,14 @@ static bool reallocAdjacentLists(Graph* graph, unsigned newCap);
  * Return true if successful and change the metadata of AdjacentList.
  * Return false if error ocurred and do not change the metadata.
  */
-static bool reallocNeighbours(AdjacentList* list, unsigned newCap);
+static bool reallocNeighbours(AdjacentList* list, unsigned newCap, unsigned oldCap);
 
 /*
  * Free the list of AdjacentVertices in the graph.
  */
 static void listFree(Graph* graph);
+
+static bool initAdjacentList(Graph* graph, unsigned vertex);
 
 Graph* graphCreate()
 {
@@ -89,23 +91,79 @@ Graph* graphRead(const char* filename)
 */
 static bool reallocAdjacentLists(Graph* graph, unsigned newCap)
 {
-    AdjacentList* newList = realloc(graph->vertices, newCap * sizeof(AdjacentList));
+    assert(graph != NULL);
+    assert(newCap > 0);
+    assert(newCap > graph->capacity);
+
+    AdjacentList* newList = realloc(graph->vertices, newCap * sizeof(graph->vertices[0]));
     if (newList == NULL)
         return false;
     graph->vertices = newList;
+    unsigned oldCap = graph->capacity;
     graph->capacity = newCap;
-    return true;
-}
 
-static bool reallocNeighbours(AdjacentList* list, unsigned newCap)
+    /* Reallocate data for already allocated adjacent lists */
+    int i = 0;
+    for (; i < oldCap; i++) {
+        if (!reallocNeighbours(&graph->vertices[i], newCap, oldCap)) {
+            /* Clear the graph */
+            i = oldCap;
+            for (; i >= 0; i--)
+                free(graph->vertices[i].vertices);
+            free(graph->vertices);
+            graph->capacity = 0;
+            graph->size = 0;
+            graph->vertices = NULL;
+            return false;
+        }
+            
+    }
+
+    /* Initialize data for newly allocated adjacent lists */
+    for(; i < newCap; i++) {
+        if (!initAdjacentList(graph, i)) {
+            for (; i >= 0; i--)
+                free(graph->vertices[i].vertices);
+            free(graph->vertices);
+            graph->capacity = 0;
+            graph->size = 0;
+            graph->vertices = NULL;
+            return false;
+        }
+    }
+
+    return true;
+} 
+
+static bool reallocNeighbours(AdjacentList* list, unsigned newCap, unsigned oldCap)
 {
+    assert (list != NULL);
+    assert(newCap > 0);
+    assert(newCap > oldCap);
     unsigned* vertices = realloc(list->vertices, sizeof(vertices[0]) * newCap);
     if (vertices == NULL) {
         return false;
     }
 
     list->vertices = vertices;
-    //list->capacity = newCap;
+    /* Initialize all new vertices to zero */
+    memset(vertices + oldCap, 0, sizeof(vertices[0]) * (newCap - oldCap));
+    return true;
+}
+
+static bool initAdjacentList(Graph* graph, unsigned vertex)
+{
+    assert(graph != NULL);
+    assert(graph->vertices);
+    assert(graph->capacity > vertex);
+
+    AdjacentList* list = &graph->vertices[vertex];
+    list->vertices = calloc(1, sizeof(list->vertices[0]) * graph->capacity);
+    if(list->vertices == NULL)
+        return false;
+
+    list->count = &graph->size;
+    list->vertex = vertex;
     return true;
 }
 
@@ -114,11 +172,12 @@ static void listFree(Graph* graph)
     if (graph == NULL || graph->vertices == NULL)
         return;
 
-    for (unsigned i = 0; i < graph->size; i++)
+    for (unsigned i = 0; i < graph->capacity; i++)
         free(graph->vertices[i].vertices);
     free(graph->vertices);
     graph->vertices = NULL;
     graph->size = 0;
+    graph->capacity = 0;
 }
 
 void graphFree(Graph** graph)
@@ -160,21 +219,14 @@ bool graphAdd(Graph* graph, unsigned count)
     if (graph == NULL)
         return false;
     if (graph->capacity <= graph->size + count) {
-        unsigned newCap = graph->capacity > 0 ? graph->capacity << 1 : 1;
+        unsigned newCap = graph->capacity > 0 ? graph->capacity << 1 : 4;
         while (newCap < graph->size + count)
             newCap <<= 1;
-        reallocAdjacentLists(graph, newCap);
-    }
-    int i = graph->size;
-    graph->size += count;
-
-    for(; i < graph->size; i++) {
-        if (!reallocNeighbours(&graph->vertices[i], graph->capacity))
+        if (!reallocAdjacentLists(graph, newCap))
             return false;
-        graph->vertices[i].count = &graph->size;
-        graph->vertices[i].vertex = i;
     }
-
+    graph->size += count;
+    assert(graph->size <= graph->capacity);
     return true;
 }
 
@@ -198,7 +250,7 @@ unsigned graphConnection(Graph* graph, unsigned a, unsigned b, bool* err)
 
 bool graphConnect(Graph* graph, unsigned a, unsigned b, unsigned weight)
 {
-    if (graph->size <= a || graph->size <= b || weight == 0)
+    if (graph == NULL || graph->size <= a || graph->size <= b || weight == 0)
         return false;
     graph->vertices[a].vertices[b] = weight;
     graph->vertices[b].vertices[a] = weight;

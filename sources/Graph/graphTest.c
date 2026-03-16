@@ -44,7 +44,7 @@ int main()
             }
         }
     }
-
+    
     assert(graphAdd(graph, COUNT));
     assert(graphSize(graph) == COUNT * 2);
     assert(graphConnect(graph, COUNT-1, 2* COUNT - 1, 11));
