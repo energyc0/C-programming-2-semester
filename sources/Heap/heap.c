@@ -97,13 +97,14 @@ int heapPop(Heap* heap)
     int numPos = 0;
     while(numPos < heap->size) {
         int topValue = numPos;
-
-        if (heap->comp(heap->data[topValue], heap->data[numPos * 2 + 1]) < 0) {
-            topValue = numPos * 2 + 1;
+        int left = numPos * 2 + 1;
+        int right = numPos * 2 + 2;
+        if (left < heap->size && heap->comp(heap->data[left], heap->data[topValue]) > 0) {
+            topValue = left;
         }
 
-        if (heap->comp(heap->data[topValue], heap->data[numPos * 2 + 2]) < 0) {
-            topValue = numPos * 2 + 2;
+        if (right < heap->size && heap->comp(heap->data[right], heap->data[topValue]) > 0) {
+            topValue = right;
         }
         if (topValue != numPos) {
             swapInt(&heap->data[numPos], &heap->data[topValue]);

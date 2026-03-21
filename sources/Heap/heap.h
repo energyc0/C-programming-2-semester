@@ -6,7 +6,8 @@ typedef struct Heap Heap;
 
 /*
  * Comparator for structuring heap values.
- * The functon must return value > 0 if left operand is needed to pop up.
+ * The functon must return value > 0 if left operand is greater,
+ * return 0 if equals, return < 0 if less.
  */
 typedef int (*HeapComparator) (int, int);
 
