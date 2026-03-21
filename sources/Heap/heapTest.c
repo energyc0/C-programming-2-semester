@@ -37,27 +37,44 @@ int main()
     assert(minHeap != NULL);
     assert(heapSize(minHeap) == ARRAY_SIZE(values));
 
-    for (int i = ARRAY_SIZE(values)-1; i >= 0; i--) {
-        printf("Max: %d, min: %d\n", sortedGreaterValues[i], sortedLessValues[i]);
-        
+    for (int i = ARRAY_SIZE(values)-1; i >= 0; i--) { 
         assert(!heapEmpty(minHeap));
         assert(!heapEmpty(maxHeap));
         int min = heapTop(minHeap);
         int max = heapTop(maxHeap);
-        printf("Max heap: %d, min heap %d\n", max, min);
 
         assert(min == heapPop(minHeap));
         assert(max == heapPop(maxHeap));
         assert(min == sortedLessValues[i]);
         assert(max == sortedGreaterValues[i]);
-        
+        assert(heapSize(minHeap) == i);
+        assert(heapSize(maxHeap) == i);
     }
 
     assert(heapEmpty(minHeap));
     assert(heapEmpty(maxHeap));
     heapFree(&maxHeap);
     heapFree(&minHeap);
-    
+    assert(maxHeap == NULL && minHeap == NULL);
+
+    maxHeap = heapCreate(greaterInt, 0, NULL);
+    minHeap = heapCreate(lessInt, 0, NULL);
+    assert(heapSize(maxHeap) == 0 && heapEmpty(maxHeap));
+    assert(heapSize(minHeap) == 0 && heapEmpty(minHeap));
+
+    for (int i = 0; i < ARRAY_SIZE(values); i++) {
+        assert(heapPush(minHeap, sortedLessValues[i]));
+        assert(heapPush(maxHeap, sortedGreaterValues[i]));
+
+        assert(heapTop(minHeap) == sortedLessValues[i]);
+        assert(heapTop(maxHeap) == sortedGreaterValues[i]);
+
+        assert(heapSize(minHeap) == i+1);
+        assert(heapSize(maxHeap) == i+1);
+    }
+
+    heapFree(&maxHeap);
+    heapFree(&minHeap);
     assert(maxHeap == NULL && minHeap == NULL);
     return 0;
 }
