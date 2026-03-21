@@ -3,7 +3,7 @@
 #include <string.h>
 
 typedef struct Heap {
-    int* data;
+    void** data;
     unsigned size;
     unsigned capacity;
     HeapComparator comp;
@@ -21,16 +21,16 @@ static unsigned nearestPow2(unsigned num)
     return res;
 }
 
-static void swapInt(int* a, int* b)
+static void swapPtr(void** a, void** b)
 {
-    int temp = *a;
+    void* temp = *a;
     *a = *b;
     *b = temp;
 }
 
 bool heapIncreaseCapacity(Heap* heap)
 {
-    int* newData = realloc(heap->data, (heap->capacity << 1) * sizeof(heap->data[0]));
+    void** newData = realloc(heap->data, (heap->capacity << 1) * sizeof(heap->data[0]));
     if (newData == NULL)
         return false;
 
@@ -39,9 +39,9 @@ bool heapIncreaseCapacity(Heap* heap)
     return true;
 }
 
-Heap* heapCreate(HeapComparator comp, unsigned count, int* nums)
+Heap* heapCreate(HeapComparator comp, unsigned count, void** data)
 {
-    if (comp == NULL || (count != 0 && nums == NULL) || (nums != NULL && count == 0))
+    if (comp == NULL || (count != 0 && data == NULL) || (data != NULL && count == 0))
         return NULL;
 
     Heap* heap = malloc(sizeof(*heap));
@@ -49,7 +49,7 @@ Heap* heapCreate(HeapComparator comp, unsigned count, int* nums)
         return NULL;
 
     heap->capacity = count > 8 ? nearestPow2(count) : 8;
-    heap->data = malloc(sizeof(heap->data[0]) * heap->capacity);
+    heap->data = calloc(sizeof(heap->data[0]), heap->capacity);
     if (heap->data == NULL) {
         free(heap);
         return NULL;
@@ -58,12 +58,12 @@ Heap* heapCreate(HeapComparator comp, unsigned count, int* nums)
     heap->comp = comp;
 
     for (unsigned i = 0; i < count; i++) {
-        heapPush(heap, nums[i]);
+        heapPush(heap, data[i]);
     }
     return heap;
 }
 
-bool heapPush(Heap* heap, int num)
+bool heapPush(Heap* heap, void* val)
 {
     if (heap == NULL)
         return false;
@@ -74,24 +74,24 @@ bool heapPush(Heap* heap, int num)
 
     /* Insert number at the end of the heap. */
     unsigned numPos = heap->size++;
-    HEAP_BACK(heap) = num;
+    HEAP_BACK(heap) = val;
 
     /* Pop up the number. */
     while(numPos > 0 && heap->comp(heap->data[numPos], heap->data[(numPos - 1) / 2]) > 0) {
-        swapInt(&heap->data[numPos], &heap->data[(numPos - 1) / 2]);
+        swapPtr(&heap->data[numPos], &heap->data[(numPos - 1) / 2]);
         numPos = (numPos - 1) / 2;
     }
 
     return true;
 }
 
-int heapPop(Heap* heap)
+void* heapPop(Heap* heap)
 {
     if (heapEmpty(heap))
         return 0;
 
-    int ret = HEAP_TOP(heap);
-    swapInt(&HEAP_TOP(heap), &HEAP_BACK(heap));
+    void* ret = HEAP_TOP(heap);
+    swapPtr(&HEAP_TOP(heap), &HEAP_BACK(heap));
     heap->size--;
 
     int numPos = 0;
@@ -107,7 +107,7 @@ int heapPop(Heap* heap)
             topValue = right;
         }
         if (topValue != numPos) {
-            swapInt(&heap->data[numPos], &heap->data[topValue]);
+            swapPtr(&heap->data[numPos], &heap->data[topValue]);
             numPos = topValue;
         } else {
             break;
@@ -117,16 +117,21 @@ int heapPop(Heap* heap)
     return ret;
 }
 
-int heapTop(Heap* heap)
+void* heapTop(Heap* heap)
 {
-    return heapEmpty(heap) ? 0 : HEAP_TOP(heap);
+    return heapEmpty(heap) ? NULL : HEAP_TOP(heap);
 }
 
-void heapFree(Heap** heap)
+void heapFree(Heap** heap, HeapCleaner cleaner)
 {
     if (heap == NULL || *heap == NULL)
         return;
 
+    if (cleaner) {
+        for(unsigned i = 0; i < (*heap)->size; i++) {
+            cleaner((*heap)->data[i]);
+        }
+    }
     free((*heap)->data);
     free(*heap);
     *heap = NULL;
