@@ -5,7 +5,8 @@
 typedef struct Heap Heap;
 
 /*
- * Comparator for structuring heap values
+ * Comparator for structuring heap values.
+ * The functon must return value > 0 if left operand is needed to pop up.
  */
 typedef int (*HeapComparator) (int, int);
 
@@ -28,6 +29,13 @@ bool heapPush(Heap* heap, int num);
  * User must check the size of the heap manually via heapSize() or heapEmpty().
  */
 int heapPop(Heap* heap);
+
+/*
+ * Return value from the top of the heap.
+ * If heap is NULL or empty return 0 always.
+ * User must check the size of the heap manually via heapSize() or heapEmpty().
+ */
+int heapTop(Heap* heap);
 
 /*
  * Return true if heap is empty or NULL pointer.
