@@ -68,8 +68,6 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
             fclose(file);
             return false;
         }
-        /* Debug print */
-        printf("Connect %d and %d with %d\n", a-1, b-1, weight);
         if(!graphConnect(newGraph, a-1, b-1, weight)) {
             fprintf(stderr, "Failed to connect vertices in the graph.\n");
             graphFree(&newGraph);
@@ -137,7 +135,6 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
     }
 
     /* Initialize start cities and heaps for BFS */
-    printf("States:");
     for (int i = 0; i < stateCount; i++) {
             VertexRoad* newRoad = malloc(sizeof(*newRoad));
             if (newRoad == NULL) {
@@ -148,15 +145,12 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
             newRoad->vert = states[i];
             newRoad->weight = 0;
             stateHeaps[i] = heapCreate(lessRoad, 1, (void**)&newRoad);
-            //cityStates[states[i]-1] = states[i];
-            printf(" %d", states[i]);
             if (stateHeaps[i] == NULL) {
                 fprintf(stderr, "Failed to allocate memory for the heap.\n");
                 heapsFree(stateHeaps, i);
                 return false;
             }
     }
-    putchar('\n');
 
     /* BFS for every state */
     while (true) {
@@ -182,13 +176,6 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
                         heapsFree(stateHeaps, stateCount);
                         return false;
                     }
-                    printf("State %d occupied %d\n", states[i], vert);
-                    printf("Vertices adjacent to %d:", vert);
-                    for (int i = 0; i < citiesCount; i++) {
-                        if (adjacentHasConnection(adjList, i))
-                            printf(" %d", i);
-                    }
-                    putchar('\n');
                     /* Add adjacent cities */
                     for (unsigned adjVert = 0; adjVert < citiesCount; adjVert++) {
                         if (cityStates[adjVert] == -1 && adjacentHasConnection(adjList, adjVert)) {
@@ -249,10 +236,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    printf("Cities: ");
-    for (int i = 0; i < citiesCount; i++)
-        printf(" %d", cityStates[i]);
-    putchar('\n');
     for (unsigned j = 0; j < stateCount; j++) {
         int state = states[j];
         printf("State number %d has cities:", state+1);
