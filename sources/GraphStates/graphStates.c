@@ -103,6 +103,8 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
             fclose(file);
             return false;
         }
+        /* From 0 in graph */
+        (*states)[i]--;
     }
 
     fclose(file);
@@ -122,13 +124,16 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
     /* Initialize heaps */  
     Heap* stateHeaps[stateCount];
 
+    /* Initialize with -1 means there is no state occupied the city */
     for (int i = 0; i < citiesCount; i++) {
         cityStates[i] = -1;
     }
+
+    /* Initialize start cities and heaps for BFS */
     printf("States:");
     for (int i = 0; i < stateCount; i++) {
             stateHeaps[i] = heapCreate(lessInt, 1, &states[i]);
-            cityStates[states[i]-1] = states[i];
+            //cityStates[states[i]-1] = states[i];
             printf(" %d", states[i]);
             if (stateHeaps[i] == NULL) {
                 fprintf(stderr, "Failed to allocate memory for the heap.\n");
@@ -137,7 +142,8 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
             }
     }
     putchar('\n');
-    /* BFS */
+
+    /* BFS for every state */
     while (true) {
         bool hasNonEmpty = false;
 
@@ -145,15 +151,28 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
             if (!heapEmpty(stateHeaps[i])) {
                 Heap* heap = stateHeaps[i];
                 while (!heapEmpty(heap)) {
-                    /* Numeration from 1 */
-                    int vert = heapPop(heap) - 1;
-                    /* City is occupied */
+                    unsigned vert = heapPop(heap);
+                    /* City is occupied*/
                     if (cityStates[vert] != -1)
                         continue;
                     cityStates[vert] = states[i];
+                    /* Get adjacent cities */
                     bool err = false;
                     AdjacentList* adjList = graphGetAdjacent(graph, vert, &err);
-                    for (int adjVert = 0; adjVert < citiesCount; adjVert++) {
+                    if (err) {
+                        fprintf(stderr, "Failed to get adjacent cities.\n");
+                        heapsFree(stateHeaps, stateCount);
+                        return false;
+                    }
+                    printf("State %d occupied %d\n", states[i], vert);
+                    printf("Vertices adjacent to %d:", vert);
+                    for (int i = 0; i < citiesCount; i++) {
+                        if (adjacentHasConnection(adjList, i))
+                            printf(" %d", i);
+                    }
+                    putchar('\n');
+                    /* Add adjacent cities */
+                    for (unsigned adjVert = 0; adjVert < citiesCount; adjVert++) {
                         if (cityStates[adjVert] == -1 && adjacentHasConnection(adjList, adjVert))
                             if (!heapPush(heap, adjVert)) {
                                 fprintf(stderr, "Failed to push value to the heap.\n");
@@ -162,6 +181,7 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
                             }
                     }
                     hasNonEmpty = true;
+                    break;
                 }
 
             }
@@ -200,12 +220,16 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    printf("Cities: ");
+    for (int i = 0; i < citiesCount; i++)
+        printf(" %d", cityStates[i]);
+    putchar('\n');
     for (unsigned j = 0; j < stateCount; j++) {
         int state = states[j];
-        printf("State number %d has cities:", state);
+        printf("State number %d has cities:", state+1);
         for (unsigned i = 0; i < citiesCount; i++) {
             if (cityStates[i] == state)
-                printf(" %d", i);
+                printf(" %d", i+1);
         }
         putchar('\n');
     }
