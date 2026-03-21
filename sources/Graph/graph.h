@@ -79,6 +79,12 @@ bool adjacentHasConnection(AdjacentList* list, unsigned vertex);
 unsigned adjacentGetVertex(AdjacentList* list);
 
 /*
+ * Return the weight of the edge between main vertex and 'vert'
+ * If list is freed, return ((unsigned)-1) or invalid 'vert'
+ */
+unsigned adjacentGetConnection(AdjacentList* list, unsigned vert);
+
+/*
  * Free the memory allocated for the AdjacentList
  * and set pointer to NULL.
  */

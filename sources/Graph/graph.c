@@ -267,9 +267,20 @@ unsigned adjacentGetSize(AdjacentList* list)
 
 unsigned adjacentGetVertex(AdjacentList* list)
 {
-    if (list == 0)
+    if (list == NULL)
         return (unsigned)-1;
     return list->vertex;
+}
+
+unsigned adjacentGetConnection(AdjacentList* list, unsigned vert)
+{
+    if (list == NULL)
+        return (unsigned)-1;
+
+    assert(list->count != NULL);
+    if (vert >= *list->count)
+        return (unsigned)-1; 
+    return list->vertices[vert];
 }
 
 bool adjacentHasConnection(AdjacentList* list, unsigned vertex)

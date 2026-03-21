@@ -7,12 +7,19 @@
 /* 1024x1024 */
 #define CITY_COUNT_LIMIT (1048510) 
 
+typedef struct VertexRoad {
+    unsigned vert;
+    unsigned weight;
+} VertexRoad;
+
 /* Comparator for heap */
-static int lessInt(int a, int b)
+static int lessRoad(const void* a, const void* b)
 {
-    if (a < b)
+    const VertexRoad* aRoad = a;
+    const VertexRoad* bRoad = b;
+    if (aRoad->weight < bRoad->weight)
         return 1;
-    if (a > b)
+    if (aRoad->weight > bRoad->weight)
         return -1;
     return 0;
 }
@@ -115,7 +122,7 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
 static void heapsFree(Heap** heaps, int count)
 {
     for(int i = 0; i < count; i++)
-        heapFree(&heaps[i]);
+        heapFree(&heaps[i], free);
 }
 
 bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* states, int stateCount)
@@ -132,7 +139,15 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
     /* Initialize start cities and heaps for BFS */
     printf("States:");
     for (int i = 0; i < stateCount; i++) {
-            stateHeaps[i] = heapCreate(lessInt, 1, &states[i]);
+            VertexRoad* newRoad = malloc(sizeof(*newRoad));
+            if (newRoad == NULL) {
+                fprintf(stderr, "Failed to allocate memory.\n");
+                heapsFree(stateHeaps, stateCount);
+                return false;
+            }
+            newRoad->vert = states[i];
+            newRoad->weight = 0;
+            stateHeaps[i] = heapCreate(lessRoad, 1, (void**)&newRoad);
             //cityStates[states[i]-1] = states[i];
             printf(" %d", states[i]);
             if (stateHeaps[i] == NULL) {
@@ -151,7 +166,10 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
             if (!heapEmpty(stateHeaps[i])) {
                 Heap* heap = stateHeaps[i];
                 while (!heapEmpty(heap)) {
-                    unsigned vert = heapPop(heap);
+                    VertexRoad* vertRoad = heapPop(heap);
+                    unsigned vert = vertRoad->vert;
+                    free(vertRoad);
+                    vertRoad = NULL;
                     /* City is occupied*/
                     if (cityStates[vert] != -1)
                         continue;
@@ -173,12 +191,21 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
                     putchar('\n');
                     /* Add adjacent cities */
                     for (unsigned adjVert = 0; adjVert < citiesCount; adjVert++) {
-                        if (cityStates[adjVert] == -1 && adjacentHasConnection(adjList, adjVert))
-                            if (!heapPush(heap, adjVert)) {
+                        if (cityStates[adjVert] == -1 && adjacentHasConnection(adjList, adjVert)) {
+                            VertexRoad* newRoad = malloc(sizeof(*newRoad));
+                            if (newRoad == NULL) {
+                                fprintf(stderr, "Failed to allocate memory.\n");
+                                heapsFree(stateHeaps, stateCount);
+                                return false;
+                            }
+                            newRoad->vert = adjVert;
+                            newRoad->weight = adjacentGetConnection(adjList, adjVert);
+                            if (!heapPush(heap, newRoad)) {
                                 fprintf(stderr, "Failed to push value to the heap.\n");
                                 heapsFree(stateHeaps, stateCount);
                                 return false;
                             }
+                        }
                     }
                     hasNonEmpty = true;
                     break;
@@ -216,6 +243,8 @@ int main(int argc, char** argv)
     int cityStates[citiesCount];
 
     if (!divideConquer(graph, cityStates, citiesCount, states, stateCount)) {
+        graphFree(&graph);
+        free(states);
         fprintf(stderr, "Failed to divide cities between states.\n");
         return 1;
     }
