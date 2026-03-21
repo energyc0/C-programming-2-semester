@@ -281,5 +281,5 @@ bool adjacentHasConnection(AdjacentList* list, unsigned vertex)
         return false;
 
     
-    return list->vertices[vertex] == 1;
+    return list->vertices[vertex] > 0;
 }
