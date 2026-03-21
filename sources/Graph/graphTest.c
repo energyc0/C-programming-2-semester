@@ -1,18 +1,18 @@
-#include <stdio.h>
 #include "graph.h"
 #include <assert.h>
+#include <stdio.h>
 
 int main()
 {
-    #define COUNT (7)
+#define COUNT (7)
     unsigned adjacency[COUNT][COUNT] = {
-        {0, 2, 0, 0, 0, 0, 3},
-        {2, 0, 1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 7, 0, 0},
-        {0, 0, 0, 7, 0, 1, 0},
-        {0, 0, 1, 0, 1, 0, 4},
-        {3, 1, 0, 0, 0, 4, 0},
+        { 0, 2, 0, 0, 0, 0, 3 },
+        { 2, 0, 1, 0, 0, 0, 1 },
+        { 0, 1, 0, 1, 0, 1, 0 },
+        { 0, 0, 1, 0, 7, 0, 0 },
+        { 0, 0, 0, 7, 0, 1, 0 },
+        { 0, 0, 1, 0, 1, 0, 4 },
+        { 3, 1, 0, 0, 0, 4, 0 },
     };
     Graph* graph = graphCreate();
     assert(graph != NULL);
@@ -32,24 +32,24 @@ int main()
         AdjacentList* adjList = graphGetAdjacent(graph, i, &err);
         assert(adjList != NULL);
         assert(adjacentGetVertex(adjList) == i);
-        
+
         assert(!err && adjList != NULL);
-        for(int j = 0; j < COUNT; j++) {
+        for (int j = 0; j < COUNT; j++) {
             assert(adjacency[i][j] == adjacency[j][i]);
             if (adjacency[i][j] == 1) {
                 assert(graphHasConnection(graph, i, j));
-                assert(graphConnection(graph, i, j,&err) == adjacency[i][j]);
+                assert(graphConnection(graph, i, j, &err) == adjacency[i][j]);
                 assert(!err);
                 assert(adjacentHasConnection(adjList, j));
             }
         }
     }
-    
+
     assert(graphAdd(graph, COUNT));
     assert(graphSize(graph) == COUNT * 2);
-    assert(graphConnect(graph, COUNT-1, 2* COUNT - 1, 11));
-    assert(graphHasConnection(graph, COUNT-1, 2* COUNT - 1));
-    assert(graphConnection(graph, COUNT-1, 2* COUNT - 1, &err) == 11);
+    assert(graphConnect(graph, COUNT - 1, 2 * COUNT - 1, 11));
+    assert(graphHasConnection(graph, COUNT - 1, 2 * COUNT - 1));
+    assert(graphConnection(graph, COUNT - 1, 2 * COUNT - 1, &err) == 11);
     assert(!err);
 
     graphFree(&graph);
@@ -57,5 +57,5 @@ int main()
 
     printf("Tests passed.\n");
     return 0;
-    #undef COUNT
+#undef COUNT
 }

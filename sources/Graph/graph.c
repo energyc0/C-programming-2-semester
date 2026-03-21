@@ -1,16 +1,16 @@
+#include "graph.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include "graph.h"
 
 /*
  * Graph contains of adjacency matrix.
- * vertices[i] is the i'th vertex which is adjacent to 
+ * vertices[i] is the i'th vertex which is adjacent to
  * vertices containing in AdjacentList.
  */
 typedef struct Graph {
     AdjacentList* vertices;
-    unsigned size;  /* Count of vertices in the graph */
+    unsigned size; /* Count of vertices in the graph */
     unsigned capacity; /* Capacity of 'vertices' vector */
 } Graph;
 
@@ -19,12 +19,12 @@ typedef struct Graph {
  * vertices adjacent to some other vertex
  */
 typedef struct AdjacentList {
-    unsigned vertex;    /* Main vertex */
+    unsigned vertex; /* Main vertex */
     unsigned* vertices; /* Vertices that are adjacent to main vertex */
     unsigned* count; /* Pointer to the 'size' of Graph */
 } AdjacentList;
 
-/* 
+/*
  * Realloc list of adjacent vertices in graph.
  * Return true and change to reallocated list if the operation was successful.
  * Return false and do not change the graph list if error occured.
@@ -116,11 +116,10 @@ static bool reallocAdjacentLists(Graph* graph, unsigned newCap)
             graph->vertices = NULL;
             return false;
         }
-            
     }
 
     /* Initialize data for newly allocated adjacent lists */
-    for(; i < newCap; i++) {
+    for (; i < newCap; i++) {
         if (!initAdjacentList(graph, i)) {
             for (; i >= 0; i--)
                 free(graph->vertices[i].vertices);
@@ -133,11 +132,11 @@ static bool reallocAdjacentLists(Graph* graph, unsigned newCap)
     }
 
     return true;
-} 
+}
 
 static bool reallocNeighbours(AdjacentList* list, unsigned newCap, unsigned oldCap)
 {
-    assert (list != NULL);
+    assert(list != NULL);
     assert(newCap > 0);
     assert(newCap > oldCap);
     unsigned* vertices = realloc(list->vertices, sizeof(vertices[0]) * newCap);
@@ -159,7 +158,7 @@ static bool initAdjacentList(Graph* graph, unsigned vertex)
 
     AdjacentList* list = &graph->vertices[vertex];
     list->vertices = calloc(1, sizeof(list->vertices[0]) * graph->capacity);
-    if(list->vertices == NULL)
+    if (list->vertices == NULL)
         return false;
 
     list->count = &graph->size;
@@ -190,7 +189,7 @@ void graphFree(Graph** graph)
     *graph = NULL;
 }
 
-unsigned graphSize(Graph* graph) 
+unsigned graphSize(Graph* graph)
 {
     return graph->size;
 }
@@ -232,16 +231,14 @@ bool graphAdd(Graph* graph, unsigned count)
 
 bool graphHasConnection(Graph* graph, unsigned a, unsigned b)
 {
-    return graph != NULL &&
-     graph->size > a &&
-      graph->size > b &&
-       graph->vertices[a].vertices[b] > 0;
+    return graph != NULL && graph->size > a && graph->size > b && graph->vertices[a].vertices[b] > 0;
 }
 
 unsigned graphConnection(Graph* graph, unsigned a, unsigned b, bool* err)
 {
     if (graph == NULL || graph->size <= a || graph->size <= b) {
-        if (err) *err = true;
+        if (err)
+            *err = true;
         return 0;
     }
 
@@ -279,7 +276,7 @@ unsigned adjacentGetConnection(AdjacentList* list, unsigned vert)
 
     assert(list->count != NULL);
     if (vert >= *list->count)
-        return (unsigned)-1; 
+        return (unsigned)-1;
     return list->vertices[vert];
 }
 
@@ -291,6 +288,5 @@ bool adjacentHasConnection(AdjacentList* list, unsigned vertex)
     if (*list->count <= vertex)
         return false;
 
-    
     return list->vertices[vertex] > 0;
 }

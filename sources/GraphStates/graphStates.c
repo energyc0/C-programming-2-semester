@@ -1,11 +1,11 @@
 #include "graph.h"
 #include "heap.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 /* 1024x1024 */
-#define CITY_COUNT_LIMIT (1048510) 
+#define CITY_COUNT_LIMIT (1048510)
 
 typedef struct VertexRoad {
     unsigned vert;
@@ -27,7 +27,7 @@ static int lessRoad(const void* a, const void* b)
 static bool readStates(const char* filename, Graph** graph, int** states, int* stateCount)
 {
     FILE* file = fopen(filename, "r");
-    if   (file == NULL) {
+    if (file == NULL) {
         perror("Failed to open.");
         return false;
     }
@@ -51,13 +51,12 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
         fclose(file);
         return false;
     }
-    if(!graphAdd(newGraph, cityCount)) {
+    if (!graphAdd(newGraph, cityCount)) {
         fprintf(stderr, "Failed to add vertices into the graph.\n");
         graphFree(&newGraph);
         fclose(file);
         return false;
     }
-
 
     for (int i = 0; i < roadCount; i++) {
         int a = 0;
@@ -68,7 +67,7 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
             fclose(file);
             return false;
         }
-        if(!graphConnect(newGraph, a-1, b-1, weight)) {
+        if (!graphConnect(newGraph, a - 1, b - 1, weight)) {
             fprintf(stderr, "Failed to connect vertices in the graph.\n");
             graphFree(&newGraph);
             fclose(file);
@@ -119,14 +118,14 @@ static bool readStates(const char* filename, Graph** graph, int** states, int* s
 
 static void heapsFree(Heap** heaps, int count)
 {
-    for(int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
         heapFree(&heaps[i], free);
 }
 
 bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* states, int stateCount)
 {
     assert(citiesCount >= stateCount);
-    /* Initialize heaps */  
+    /* Initialize heaps */
     Heap* stateHeaps[stateCount];
 
     /* Initialize with -1 means there is no state occupied the city */
@@ -136,20 +135,20 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
 
     /* Initialize start cities and heaps for BFS */
     for (int i = 0; i < stateCount; i++) {
-            VertexRoad* newRoad = malloc(sizeof(*newRoad));
-            if (newRoad == NULL) {
-                fprintf(stderr, "Failed to allocate memory.\n");
-                heapsFree(stateHeaps, stateCount);
-                return false;
-            }
-            newRoad->vert = states[i];
-            newRoad->weight = 0;
-            stateHeaps[i] = heapCreate(lessRoad, 1, (void**)&newRoad);
-            if (stateHeaps[i] == NULL) {
-                fprintf(stderr, "Failed to allocate memory for the heap.\n");
-                heapsFree(stateHeaps, i);
-                return false;
-            }
+        VertexRoad* newRoad = malloc(sizeof(*newRoad));
+        if (newRoad == NULL) {
+            fprintf(stderr, "Failed to allocate memory.\n");
+            heapsFree(stateHeaps, stateCount);
+            return false;
+        }
+        newRoad->vert = states[i];
+        newRoad->weight = 0;
+        stateHeaps[i] = heapCreate(lessRoad, 1, (void**)&newRoad);
+        if (stateHeaps[i] == NULL) {
+            fprintf(stderr, "Failed to allocate memory for the heap.\n");
+            heapsFree(stateHeaps, i);
+            return false;
+        }
     }
 
     /* BFS for every state */
@@ -197,7 +196,6 @@ bool divideConquer(Graph* graph, int* cityStates, unsigned citiesCount, int* sta
                     hasNonEmpty = true;
                     break;
                 }
-
             }
         }
 
@@ -238,10 +236,10 @@ int main(int argc, char** argv)
 
     for (unsigned j = 0; j < stateCount; j++) {
         int state = states[j];
-        printf("State number %d has cities:", state+1);
+        printf("State number %d has cities:", state + 1);
         for (unsigned i = 0; i < citiesCount; i++) {
             if (cityStates[i] == state)
-                printf(" %d", i+1);
+                printf(" %d", i + 1);
         }
         putchar('\n');
     }

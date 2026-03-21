@@ -17,7 +17,7 @@ static unsigned nearestPow2(unsigned num)
 {
     unsigned res = 1;
     while (res < num)
-        res <<=1;
+        res <<= 1;
     return res;
 }
 
@@ -77,7 +77,7 @@ bool heapPush(Heap* heap, void* val)
     HEAP_BACK(heap) = val;
 
     /* Pop up the number. */
-    while(numPos > 0 && heap->comp(heap->data[numPos], heap->data[(numPos - 1) / 2]) > 0) {
+    while (numPos > 0 && heap->comp(heap->data[numPos], heap->data[(numPos - 1) / 2]) > 0) {
         swapPtr(&heap->data[numPos], &heap->data[(numPos - 1) / 2]);
         numPos = (numPos - 1) / 2;
     }
@@ -95,7 +95,7 @@ void* heapPop(Heap* heap)
     heap->size--;
 
     int numPos = 0;
-    while(numPos < heap->size) {
+    while (numPos < heap->size) {
         int topValue = numPos;
         int left = numPos * 2 + 1;
         int right = numPos * 2 + 2;
@@ -128,7 +128,7 @@ void heapFree(Heap** heap, HeapCleaner cleaner)
         return;
 
     if (cleaner) {
-        for(unsigned i = 0; i < (*heap)->size; i++) {
+        for (unsigned i = 0; i < (*heap)->size; i++) {
             cleaner((*heap)->data[i]);
         }
     }

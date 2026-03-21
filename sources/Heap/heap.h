@@ -9,12 +9,12 @@ typedef struct Heap Heap;
  * The functon must return value > 0 if left operand is greater,
  * return 0 if equals, return < 0 if less.
  */
-typedef int (*HeapComparator) (const void*, const void*);
+typedef int (*HeapComparator)(const void*, const void*);
 
 /*
  * Cleaner to clean data after destroying heap.
  */
-typedef void (*HeapCleaner) (void*);
+typedef void (*HeapCleaner)(void*);
 
 /*
  * Create heap with given values and comparator.
@@ -51,7 +51,7 @@ bool heapEmpty(const Heap* heap);
 /*
  * Return the size of the heap or 0 is NULL pointer.
  */
-unsigned heapSize(const Heap* heap); 
+unsigned heapSize(const Heap* heap);
 
 /*
  * Free data allocated for the heap and sets heap pointer to NULL.

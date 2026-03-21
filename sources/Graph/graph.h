@@ -31,9 +31,9 @@ void graphFree(Graph** graph);
 /*
  * Return count of vertices in the graph
  */
-unsigned graphSize(Graph* graph); 
+unsigned graphSize(Graph* graph);
 
-/* 
+/*
  * Connect vertices 'a' and 'b' in graph with weighted edge.
  * Return true if successful, return false if error ocurred.
  * weight must be more than 0.
@@ -63,7 +63,7 @@ bool graphHasConnection(Graph* graph, unsigned a, unsigned b);
 AdjacentList* graphGetAdjacent(Graph* graph, unsigned vertex, bool* err);
 
 /*
- * Return count of vertices in the graph of the vertex 
+ * Return count of vertices in the graph of the vertex
  */
 unsigned adjacentGetSize(AdjacentList* list);
 
@@ -88,4 +88,4 @@ unsigned adjacentGetConnection(AdjacentList* list, unsigned vert);
  * Free the memory allocated for the AdjacentList
  * and set pointer to NULL.
  */
-///void graphFreeAdjacent(AdjacentList** list);
+/// void graphFreeAdjacent(AdjacentList** list);
