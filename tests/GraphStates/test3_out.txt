@@ -1,0 +1,2 @@
+State number 1 has cities: 1 3
+State number 2 has cities: 2
