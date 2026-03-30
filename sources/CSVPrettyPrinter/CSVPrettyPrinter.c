@@ -86,8 +86,8 @@ static char* copyField(const char* s, int* size, int* i)
     }
 
     char buf[BUFSIZ] = {};
-    bool has_quote = s[*i] == '"';
-    if (!has_quote) {
+    bool hasQuote = s[*i] == '"';
+    if (!hasQuote) {
         buf[0] = s[*i];
         *size = 1;
     } else {
@@ -97,9 +97,9 @@ static char* copyField(const char* s, int* size, int* i)
     (*i)++;
     for (; *i < BUFSIZ; (*i)++) {
         char c = s[*i];
-        if (c == '\0' || (!has_quote && c == ','))
+        if (c == '\0' || (!hasQuote && c == ','))
             break;
-        if (has_quote && c == '\"') {
+        if (hasQuote && c == '\"') {
             if (s[++(*i)] != '\"') {
                 break;
             }
@@ -120,29 +120,29 @@ static int countFields(const char* s)
     if (s == NULL || s[0] == '\0')
         return 0;
     int res = 0;
-    bool has_quote = s[0] == '"';
-    bool has_null_delimiter = false;
-    for (int i = 1; !has_null_delimiter; i++) {
+    bool hasQuote = s[0] == '"';
+    bool hasNullDelimiter = false;
+    for (int i = 1; !hasNullDelimiter; i++) {
         switch (s[i]) {
         case ',':
-            if (!has_quote) {
+            if (!hasQuote) {
                 res++;
                 if (s[++i] == '"') {
-                    has_quote = true;
+                    hasQuote = true;
                     i++;
                 } else {
-                    has_quote = false;
+                    hasQuote = false;
                 }
             }
             break;
         case '"':
             if (s[i + 1] != '"') {
-                has_quote = false;
+                hasQuote = false;
             }
             break;
         case '\0':
             res++;
-            has_null_delimiter = true;
+            hasNullDelimiter = true;
             break;
         }
     }
@@ -179,10 +179,9 @@ static bool parseLine(const char* line, CSVData* data)
         }
     }
     /* Allocate all the data needed for the node. */
-    LineNode* node = malloc(sizeof(*node));
+    LineNode* node = calloc(1, sizeof(*node));
     if (node == NULL)
         return false;
-    memset(node, 0, sizeof(*node));
 
     node->fieldWidths = malloc(sizeof(node->fieldWidths[0]) * data->fieldsCount);
     if (node->fieldWidths == NULL) {
@@ -265,7 +264,10 @@ static char* drawRow(char* buf, const int* fieldWidths, int fieldsCount, char ro
 
 static bool isNumber(const char* s, int size)
 {
-    for (int i = 0; i < size && s[i] != '\0'; i++) {
+    if (size == 0)
+        return false;
+    int i = (s[0] == '+' || s[0] == '-') ? 1 : 0;
+    for (; i < size && s[i] != '\0'; i++) {
         char c = s[i];
         if (('0' > c || c > '9') && c != '.')
             return false;
@@ -274,11 +276,11 @@ static bool isNumber(const char* s, int size)
 }
 
 /* Draws fields of line in buffer and returns it. */
-static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const int* fieldMaxWidths)
+static char* drawFields(char* buf, const LineNode* node, int fieldsCount, const int* fieldMaxWidths, bool leftJustified)
 {
     int i = 0;
     for (int f = 0; f < fieldsCount; f++) {
-        bool isRightJustified = f != 0 && isNumber(node->fields[f], node->fieldWidths[f]);
+        bool isRightJustified = !leftJustified && isNumber(node->fields[f], node->fieldWidths[f]);
         buf[i++] = '|';
         /* Fields may be empty */
         if (node->fields[f] != NULL) {
@@ -303,13 +305,13 @@ bool CSVDataWrite(const CSVData* data, FILE* fp)
     char buf[BUFSIZ] = {};
     if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '=')) < 0)
         return false;
-    if (fprintf(fp, "%s\n", drawFields(buf, data->head, data->fieldsCount, data->fieldMaxWidths)) < 0)
+    if (fprintf(fp, "%s\n", drawFields(buf, data->head, data->fieldsCount, data->fieldMaxWidths, true)) < 0)
         return false;
     if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '=')) < 0)
         return false;
 
     for (LineNode* p = data->head->next; p != NULL; p = p->next) {
-        if (fprintf(fp, "%s\n", drawFields(buf, p, data->fieldsCount, data->fieldMaxWidths)) < 0)
+        if (fprintf(fp, "%s\n", drawFields(buf, p, data->fieldsCount, data->fieldMaxWidths, false)) < 0)
             return false;
         if (fprintf(fp, "%s\n", drawRow(buf, data->fieldMaxWidths, data->fieldsCount, '-')) < 0)
             return false;
