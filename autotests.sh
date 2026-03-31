@@ -15,6 +15,8 @@ do
     then
         echo "${script} - failed!"
         result=1
+    else
+        echo "${script} - passed."
     fi
 done
 
